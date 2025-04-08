@@ -28,9 +28,16 @@ const EmailCompose = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Nouveau message</h2>
-      <form onSubmit={handleSubmit}>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-6"
+    >
+      <h2 className="text-xl font-bold mb-4 flex items-center">
+        <span className="material-icons mr-2">edit</span>
+        Nouveau message
+      </h2>
+      <form onSubmit={handleSubmit} className="bg-dark-darker p-4 rounded-lg">
         <div className="mb-4">
           <label htmlFor="to" className="block text-sm font-medium text-gray-400 mb-1">
             Destinataire
@@ -76,16 +83,24 @@ const EmailCompose = () => {
           />
         </div>
         
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-3 mt-6">
+          <button
+            type="button"
+            className="bg-dark hover:bg-gray-800 text-gray-300 px-4 py-2 rounded-lg flex items-center"
+          >
+            <span className="material-icons mr-2">save</span>
+            Enregistrer
+          </button>
           <button
             type="submit"
-            className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg"
+            className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center"
           >
+            <span className="material-icons mr-2">send</span>
             Envoyer
           </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

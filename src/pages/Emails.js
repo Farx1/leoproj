@@ -33,20 +33,27 @@ const Emails = () => {
       transition={{ duration: 0.5 }}
       className="grid grid-cols-1 lg:grid-cols-3 gap-6"
     >
-      <div className="lg:col-span-1 bg-dark rounded-lg shadow-lg">
+      <h1 className="text-3xl font-bold mb-6 col-span-full">Gestion des emails</h1>
+      <div className="lg:col-span-1 bg-dark rounded-lg shadow-lg overflow-hidden">
         <div className="border-b border-gray-700 p-4">
-          <div className="flex space-x-4">
-            {['inbox', 'sent', 'draft', 'trash'].map((view) => (
+          <div className="flex space-x-2 overflow-x-auto pb-2">
+            {[
+              { id: 'inbox', icon: 'inbox', label: 'Boîte de réception' },
+              { id: 'sent', icon: 'send', label: 'Envoyés' },
+              { id: 'draft', icon: 'drafts', label: 'Brouillons' },
+              { id: 'trash', icon: 'delete', label: 'Corbeille' }
+            ].map((view) => (
               <button
-                key={view}
-                className={`px-4 py-2 rounded-lg text-sm capitalize ${
-                  activeView === view 
+                key={view.id}
+                className={`px-4 py-2 rounded-lg text-sm flex items-center whitespace-nowrap ${
+                  activeView === view.id 
                     ? 'bg-primary text-white' 
                     : 'text-gray-400 hover:bg-gray-800'
                 }`}
-                onClick={() => handleViewChange(view)}
+                onClick={() => handleViewChange(view.id)}
               >
-                {view}
+                <span className="material-icons text-sm mr-1">{view.icon}</span>
+                {view.label}
               </button>
             ))}
           </div>
@@ -59,33 +66,57 @@ const Emails = () => {
         />
       </div>
 
-      <div className="lg:col-span-2 bg-dark rounded-lg shadow-lg">
+      <div className="lg:col-span-2 bg-dark rounded-lg shadow-lg overflow-hidden">
         {selectedEmail ? (
-          <div className="p-6">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="p-6"
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">{selectedEmail.subject}</h2>
               <button 
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-800"
                 onClick={() => setSelectedEmail(null)}
               >
                 <span className="material-icons">close</span>
               </button>
             </div>
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                <span className="text-primary font-bold">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
+                <span className="text-primary font-bold text-lg">
                   {selectedEmail.sender.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-white">{selectedEmail.sender}</p>
+                <p className="font-medium text-white text-lg">{selectedEmail.sender}</p>
                 <p className="text-sm text-gray-400">{selectedEmail.email}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(selectedEmail.date).toLocaleString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
               </div>
             </div>
-            <div className="text-gray-300 leading-relaxed">
+            <div className="text-gray-300 leading-relaxed bg-dark-darker p-6 rounded-lg">
               {selectedEmail.body}
             </div>
-          </div>
+            <div className="mt-6 flex space-x-3">
+              <button className="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg flex items-center">
+                <span className="material-icons mr-2">reply</span>
+                Répondre
+              </button>
+              <button className="bg-dark-darker hover:bg-gray-800 text-gray-300 px-4 py-2 rounded-lg flex items-center">
+                <span className="material-icons mr-2">forward</span>
+                Transférer
+              </button>
+            </div>
+          </motion.div>
         ) : (
           <EmailCompose />
         )}
