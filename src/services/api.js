@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AuthService from './auth';
 
 // Création d'une instance axios avec la configuration de base
 const api = axios.create({
@@ -8,10 +9,10 @@ const api = axios.create({
   }
 });
 
-// Intercepteur pour ajouter le token d'authentification à chaque requête
+// Intercepteur pour ajouter le token JWT à chaque requête
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = AuthService.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,8 +29,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expiré ou invalide
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      AuthService.logout();
       window.location.href = '/login';
     }
     return Promise.reject(error);
