@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import EmployeeForm from '../components/Employees/EmployeeForm';
 
 const Employees = () => {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -162,6 +164,12 @@ const Employees = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
+                        <button 
+                          className="p-1 rounded hover:bg-gray-700"
+                          onClick={() => navigate(`/employees/${employee.id}`)}
+                        >
+                          <span className="material-icons text-green-400">visibility</span>
+                        </button>
                         <button 
                           className="p-1 rounded hover:bg-gray-700"
                           onClick={() => handleEditEmployee(employee)}
