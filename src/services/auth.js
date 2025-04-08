@@ -28,6 +28,15 @@ const mockUsers = [
   }
 ];
 
+// Afficher les informations de connexion en mode développement
+if (process.env.NODE_ENV === 'development') {
+  console.log('Mode développement activé');
+  console.log('Utilisateurs disponibles pour les tests:');
+  mockUsers.forEach(user => {
+    console.log(`- ${user.name} (${user.email} / ${user.password}) - Rôles: ${user.roles.join(', ')}`);
+  });
+}
+
 // Génération d'un JWT pour le développement
 const generateJWT = (user) => {
   // Créer le header et payload JWT
@@ -86,7 +95,8 @@ const AuthService = {
   logout: () => {
     localStorage.removeItem('token');
     // Rediriger vers la page de connexion avec HashRouter
-    window.location.href = '/#/login';
+    const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
+    window.location.href = `${baseUrl}login`;
   },
 
   // Récupérer l'utilisateur actuel à partir du token JWT
