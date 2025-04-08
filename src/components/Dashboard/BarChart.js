@@ -29,7 +29,23 @@ const BarChart = ({ data, title }) => {
       
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.roundRect(x, y, barWidth, barHeight, 4);
+      
+      // Polyfill pour roundRect si non supporté
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, barWidth, barHeight, 4);
+      } else {
+        // Fallback pour les navigateurs qui ne supportent pas roundRect
+        ctx.moveTo(x + 4, y);
+        ctx.lineTo(x + barWidth - 4, y);
+        ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + 4);
+        ctx.lineTo(x + barWidth, y + barHeight - 4);
+        ctx.quadraticCurveTo(x + barWidth, y + barHeight, x + barWidth - 4, y + barHeight);
+        ctx.lineTo(x + 4, y + barHeight);
+        ctx.quadraticCurveTo(x, y + barHeight, x, y + barHeight - 4);
+        ctx.lineTo(x, y + 4);
+        ctx.quadraticCurveTo(x, y, x + 4, y);
+      }
+      
       ctx.fill();
       
       // Draw value
