@@ -1,5 +1,4 @@
 import axios from 'axios';
-import AuthService from './auth';
 
 // Création d'une instance axios avec la configuration de base
 const api = axios.create({
@@ -12,7 +11,7 @@ const api = axios.create({
 // Intercepteur pour ajouter le token JWT à chaque requête
 api.interceptors.request.use(
   (config) => {
-    const token = AuthService.getToken();
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,10 +26,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    // Vérifier si l'erreur est due à un problème réseau
+    if (!error.response) {
+      console.log('Problème de connexion réseau détecté');
+      return Promise.reject(error);
+    }
+    
+    if (error.response.status === 401) {
       // Token expiré ou invalide
-      AuthService.logout();
-      window.location.href = '/login';
+      localStorage.removeItem('token');
+      window.location.href = '/#/login';
     }
     return Promise.reject(error);
   }

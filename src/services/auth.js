@@ -1,4 +1,3 @@
-import api from './api';
 import { jwtDecode } from 'jwt-decode';
 
 // Simulation d'une base de données utilisateurs pour le développement
@@ -42,6 +41,7 @@ const generateJWT = (user) => {
     name: user.name,
     email: user.email,
     roles: user.roles,
+    avatar: user.avatar,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 3600 // Expire dans 1 heure
   };
@@ -58,34 +58,26 @@ const AuthService = {
   // Connexion utilisateur
   login: async (email, password) => {
     try {
-      // En environnement de développement, utiliser les utilisateurs mockés
-      if (process.env.NODE_ENV === 'development') {
-        const user = mockUsers.find(u => u.email === email && u.password === password);
-        
-        if (!user) {
-          throw { response: { data: { message: 'Identifiants invalides' } } };
-        }
-        
-        // Générer un JWT
-        const token = generateJWT(user);
-        
-        // Stocker uniquement le token dans localStorage
-        localStorage.setItem('token', token);
-        
-        // Créer une version sécurisée de l'utilisateur (sans mot de passe)
-        const safeUser = { ...user };
-        delete safeUser.password;
-        
-        return { user: safeUser, token };
-      } else {
-        // En production, appeler l'API réelle
-        const response = await api.post('/auth/login', { email, password });
-        if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-        }
-        return response.data;
+      // Toujours utiliser les utilisateurs mockés pour la démo
+      const user = mockUsers.find(u => u.email === email && u.password === password);
+      
+      if (!user) {
+        throw { response: { data: { message: 'Identifiants invalides' } } };
       }
+      
+      // Générer un JWT
+      const token = generateJWT(user);
+      
+      // Stocker uniquement le token dans localStorage
+      localStorage.setItem('token', token);
+      
+      // Créer une version sécurisée de l'utilisateur (sans mot de passe)
+      const safeUser = { ...user };
+      delete safeUser.password;
+      
+      return { user: safeUser, token };
     } catch (error) {
+      console.error('Erreur de connexion:', error);
       throw error;
     }
   },
@@ -93,6 +85,8 @@ const AuthService = {
   // Déconnexion
   logout: () => {
     localStorage.removeItem('token');
+    // Rediriger vers la page de connexion avec HashRouter
+    window.location.href = '/#/login';
   },
 
   // Récupérer l'utilisateur actuel à partir du token JWT
@@ -117,11 +111,11 @@ const AuthService = {
         name: decoded.name,
         email: decoded.email,
         roles: decoded.roles,
-        // En production, l'avatar pourrait être inclus dans le token ou récupéré séparément
-        avatar: mockUsers.find(u => u.id.toString() === decoded.sub)?.avatar
+        avatar: decoded.avatar || `https://randomuser.me/api/portraits/men/${decoded.sub}.jpg`
       };
     } catch (e) {
       console.error('Erreur lors du décodage du token:', e);
+      localStorage.removeItem('token');
       return null;
     }
   },
@@ -135,6 +129,7 @@ const AuthService = {
       const decoded = jwtDecode(token);
       return decoded.exp * 1000 > Date.now();
     } catch (e) {
+      localStorage.removeItem('token');
       return false;
     }
   },
