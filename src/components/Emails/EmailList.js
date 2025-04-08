@@ -1,7 +1,6 @@
 import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { motion } from 'framer-motion';
 
 const EmailList = ({ emails, onEmailSelect, loading }) => {
   if (loading) {
@@ -14,47 +13,71 @@ const EmailList = ({ emails, onEmailSelect, loading }) => {
 
   if (emails.length === 0) {
     return (
-      <div className="text-center text-gray-400 p-6">
-        <span className="material-icons text-4xl mb-2">inbox</span>
-        <p>Aucun email dans ce dossier</p>
+      <div className="flex justify-center items-center h-64 text-gray-400">
+        <div className="text-center">
+          <span className="material-icons text-6xl mb-4">inbox</span>
+          <p>Aucun email dans cette boîte</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
-      {emails.map((email, index) => (
-        <motion.div
-          key={email.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.05 }}
-          className={`p-4 border-b border-gray-700 hover:bg-dark-darker cursor-pointer ${
-            !email.read ? 'bg-dark-darker/50' : ''
-          }`}
-          onClick={() => onEmailSelect(email)}
-        >
-          <div className="flex justify-between items-start mb-1">
-            <div className="flex items-center">
-              {!email.read && (
-                <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-              )}
-              <h3 className={`font-medium ${!email.read ? 'font-bold text-white' : 'text-gray-300'}`}>
-                {email.sender}
-              </h3>
-            </div>
-            <span className="text-xs text-gray-400">
-              {formatDistanceToNow(new Date(email.date), { addSuffix: true, locale: fr })}
-            </span>
-          </div>
-          <h4 className={`text-sm mb-1 ${!email.read ? 'font-semibold text-white' : 'text-gray-300'}`}>
-            {email.subject}
-          </h4>
-          <p className="text-xs text-gray-400 truncate">
-            {email.body.substring(0, 100)}...
-          </p>
-        </motion.div>
-      ))}
+    <div className="h-full overflow-y-auto">
+      <ul className="divide-y divide-gray-800">
+        {emails.map((email) => (
+          <li key={email.id}>
+            <button
+              onClick={() => onEmailSelect(email)}
+              className={`w-full text-left p-4 hover:bg-gray-800 transition-colors ${
+                !email.read ? 'bg-gray-800/50' : ''
+              }`}
+            >
+              <div className="flex items-start">
+                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-700 mr-3 flex-shrink-0">
+                  {email.from.avatar ? (
+                    <img src={email.from.avatar} alt={email.from.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-primary text-white">
+                      {email.from.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <h3 className={`text-sm font-medium truncate ${!email.read ? 'text-white' : 'text-gray-400'}`}>
+                      {email.from.name}
+                    </h3>
+                    <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                      {format(new Date(email.date), 'dd MMM', { locale: fr })}
+                    </span>
+                  </div>
+                  
+                  <p className={`text-sm truncate ${!email.read ? 'text-white font-medium' : 'text-gray-400'}`}>
+                    {email.subject}
+                  </p>
+                  
+                  <p className="text-xs text-gray-500 truncate mt-1">
+                    {email.body.substring(0, 100)}...
+                  </p>
+                  
+                  {email.attachments && email.attachments.length > 0 && (
+                    <div className="flex items-center mt-2">
+                      <span className="material-icons text-gray-500 text-xs mr-1">attachment</span>
+                      <span className="text-xs text-gray-500">{email.attachments.length} pièce(s) jointe(s)</span>
+                    </div>
+                  )}
+                </div>
+                
+                {!email.read && (
+                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 ml-2 mt-2"></div>
+                )}
+              </div>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

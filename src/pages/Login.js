@@ -102,6 +102,15 @@ const Login = () => {
             {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
         </form>
+        
+        <div className="mt-6 text-center text-gray-400">
+          <p>Utilisateurs de test:</p>
+          <ul className="mt-2 text-sm">
+            <li>admin@example.com / admin123 (Admin)</li>
+            <li>manager@example.com / manager123 (Manager)</li>
+            <li>user@example.com / user123 (Utilisateur)</li>
+          </ul>
+        </div>
       </div>
     </motion.div>
   );

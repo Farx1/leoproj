@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import EmployeeForm from '../components/Employees/EmployeeForm';
+import EmployeeService from '../services/employee';
+import { useAuth } from '../contexts/AuthContext';
 
 const Employees = () => {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,12 +16,20 @@ const Employees = () => {
   const [currentEmployee, setCurrentEmployee] = useState(null);
 
   useEffect(() => {
-    // Simuler un chargement de données
-    setTimeout(() => {
-      setEmployees(mockEmployees);
-      setLoading(false);
-    }, 1000);
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const response = await EmployeeService.getAll();
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des employés:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddEmployee = () => {
     setCurrentEmployee(null);
@@ -30,35 +41,55 @@ const Employees = () => {
     setShowForm(true);
   };
 
-  const handleSaveEmployee = (employeeData) => {
-    if (currentEmployee) {
-      // Mise à jour d'un employé existant
-      setEmployees(employees.map(emp => 
-        emp.id === employeeData.id ? employeeData : emp
-      ));
-    } else {
-      // Ajout d'un nouvel employé
-      setEmployees([...employees, employeeData]);
+  const handleSaveEmployee = async (employeeData) => {
+    try {
+      setLoading(true);
+      if (currentEmployee) {
+        // Mise à jour d'un employé existant
+        await EmployeeService.update(employeeData.id, employeeData);
+      } else {
+        // Ajout d'un nouvel employé
+        await EmployeeService.create(employeeData);
+      }
+      fetchEmployees();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de l\'employé:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteEmployee = (id) => {
+  const handleDeleteEmployee = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {
-      setEmployees(employees.filter(emp => emp.id !== id));
+      try {
+        setLoading(true);
+        await EmployeeService.delete(id);
+        fetchEmployees();
+      } catch (error) {
+        console.error('Erreur lors de la suppression de l\'employé:', error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
+  const handleViewDetails = (id) => {
+    navigate(`/employees/${id}`);
+  };
+
+  // Filtrer les employés en fonction de la recherche et du département
   const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         employee.position.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDepartment = selectedDepartment === 'all' || employee.department === selectedDepartment;
     
     return matchesSearch && matchesDepartment;
   });
 
-  const departments = ['Marketing', 'IT', 'Finance', 'RH', 'Direction'];
+  // Obtenir la liste unique des départements
+  const departments = ['all', ...new Set(employees.map(emp => emp.department))];
 
   return (
     <motion.div
@@ -68,164 +99,161 @@ const Employees = () => {
     >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestion des Employés</h1>
-        <button 
-          className="btn btn-primary"
-          onClick={handleAddEmployee}
-        >
-          <span className="material-icons mr-2">add</span>
-          Nouvel Employé
-        </button>
+        
+        {hasRole('admin') && (
+          <button
+            onClick={handleAddEmployee}
+            className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center"
+          >
+            <span className="material-icons mr-2">add</span>
+            Ajouter un employé
+          </button>
+        )}
       </div>
-
-      <div className="bg-dark rounded-lg shadow-lg p-6 mb-6">
+      
+      {/* Filtres */}
+      <div className="bg-dark rounded-lg p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
+            <label className="block text-gray-400 mb-2">Recherche</label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                 <span className="material-icons">search</span>
               </span>
               <input
                 type="text"
-                placeholder="Rechercher un employé..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                placeholder="Rechercher par nom, email, poste..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 p-3 text-white"
               />
             </div>
           </div>
-          <div>
+          
+          <div className="md:w-64">
+            <label className="block text-gray-400 mb-2">Département</label>
             <select
-              className="w-full md:w-48 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white"
             >
-              <option value="all">Tous les services</option>
               {departments.map((dept) => (
-                <option key={dept} value={dept}>{dept}</option>
+                <option key={dept} value={dept}>
+                  {dept === 'all' ? 'Tous les départements' : dept}
+                </option>
               ))}
             </select>
           </div>
         </div>
       </div>
-
+      
+      {/* Liste des employés */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="loader">Chargement...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : (
-        <div className="bg-dark rounded-lg shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-800 text-gray-300">
-                <tr>
-                  <th className="px-6 py-3">Nom</th>
-                  <th className="px-6 py-3">Email</th>
-                  <th className="px-6 py-3">Poste</th>
-                  <th className="px-6 py-3">Service</th>
-                  <th className="px-6 py-3">Statut</th>
-                  <th className="px-6 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {filteredEmployees.map((employee) => (
-                  <tr key={employee.id} className="hover:bg-gray-800">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                          <span className="text-primary font-bold">
-                            {employee.name.split(' ').map(n => n[0]).join('')}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{employee.name}</p>
-                          <p className="text-sm text-gray-400">ID: {employee.id}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">{employee.email}</td>
-                    <td className="px-6 py-4 text-gray-300">{employee.position}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        employee.department === 'IT' ? 'bg-blue-900 text-blue-300' :
-                        employee.department === 'Marketing' ? 'bg-purple-900 text-purple-300' :
-                        employee.department === 'Finance' ? 'bg-green-900 text-green-300' :
-                        employee.department === 'RH' ? 'bg-yellow-900 text-yellow-300' :
-                        'bg-red-900 text-red-300'
-                      }`}>
-                        {employee.department}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        employee.status === 'Actif' ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-300'
-                      }`}>
-                        {employee.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-2">
-                        <button 
-                          className="p-1 rounded hover:bg-gray-700"
-                          onClick={() => navigate(`/employees/${employee.id}`)}
-                        >
-                          <span className="material-icons text-green-400">visibility</span>
-                        </button>
-                        <button 
-                          className="p-1 rounded hover:bg-gray-700"
-                          onClick={() => handleEditEmployee(employee)}
-                        >
-                          <span className="material-icons text-blue-400">edit</span>
-                        </button>
-                        <button 
-                          className="p-1 rounded hover:bg-gray-700"
-                          onClick={() => handleDeleteEmployee(employee.id)}
-                        >
-                          <span className="material-icons text-red-400">delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-4 bg-gray-800 border-t border-gray-700">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-400">
-                Affichage de {filteredEmployees.length} sur {employees.length} employés
-              </div>
-              <div className="flex space-x-2">
-                <button className="px-3 py-1 rounded bg-gray-700 text-white hover:bg-gray-600">Précédent</button>
-                <button className="px-3 py-1 rounded bg-primary text-white hover:bg-primary-dark">Suivant</button>
-              </div>
+        <>
+          {filteredEmployees.length === 0 ? (
+            <div className="bg-dark rounded-lg p-8 text-center">
+              <p className="text-gray-400 text-lg">Aucun employé trouvé</p>
             </div>
+          ) : (
+            <div className="bg-dark rounded-lg overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-800">
+                <thead className="bg-dark-lighter">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Employé</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Poste</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Département</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Statut</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {filteredEmployees.map((employee) => (
+                    <tr key={employee.id} className="hover:bg-dark-lighter">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-700">
+                            {employee.avatar ? (
+                              <img src={employee.avatar} alt={employee.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center bg-primary text-white">
+                                {employee.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-white">{employee.name}</div>
+                            <div className="text-sm text-gray-400">{employee.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-white">{employee.position}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-white">{employee.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          employee.status === 'Actif' ? 'bg-green-900 text-green-300' : 
+                          employee.status === 'En congé' ? 'bg-yellow-900 text-yellow-300' : 
+                          'bg-red-900 text-red-300'
+                        }`}>
+                          {employee.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleViewDetails(employee.id)}
+                          className="text-primary hover:text-primary-light mr-3"
+                        >
+                          <span className="material-icons">visibility</span>
+                        </button>
+                        
+                        {hasRole('admin') && (
+                          <>
+                            <button
+                              onClick={() => handleEditEmployee(employee)}
+                              className="text-blue-500 hover:text-blue-400 mr-3"
+                            >
+                              <span className="material-icons">edit</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => handleDeleteEmployee(employee.id)}
+                              className="text-red-500 hover:text-red-400"
+                            >
+                              <span className="material-icons">delete</span>
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+      
+      {/* Modal pour ajouter/modifier un employé */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-dark rounded-lg w-full max-w-2xl">
+            <EmployeeForm
+              employee={currentEmployee}
+              onClose={() => setShowForm(false)}
+              onSave={handleSaveEmployee}
+            />
           </div>
         </div>
-      )}
-
-      {showForm && (
-        <EmployeeForm 
-          employee={currentEmployee}
-          onClose={() => setShowForm(false)}
-          onSave={handleSaveEmployee}
-        />
       )}
     </motion.div>
   );
 };
-
-// Données fictives pour les employés
-const mockEmployees = [
-  { id: 'EMP001', name: 'Jean Dupont', email: 'jean.dupont@entreprise.fr', position: 'Développeur Senior', department: 'IT', status: 'Actif' },
-  { id: 'EMP002', name: 'Marie Martin', email: 'marie.martin@entreprise.fr', position: 'Chef de Projet', department: 'IT', status: 'Actif' },
-  { id: 'EMP003', name: 'Pierre Durand', email: 'pierre.durand@entreprise.fr', position: 'Responsable Marketing', department: 'Marketing', status: 'Actif' },
-  { id: 'EMP004', name: 'Sophie Petit', email: 'sophie.petit@entreprise.fr', position: 'Comptable', department: 'Finance', status: 'Actif' },
-  { id: 'EMP005', name: 'Thomas Bernard', email: 'thomas.bernard@entreprise.fr', position: 'Directeur Technique', department: 'Direction', status: 'Actif' },
-  { id: 'EMP006', name: 'Julie Leroy', email: 'julie.leroy@entreprise.fr', position: 'Responsable RH', department: 'RH', status: 'Actif' },
-  { id: 'EMP007', name: 'Nicolas Moreau', email: 'nicolas.moreau@entreprise.fr', position: 'Développeur Frontend', department: 'IT', status: 'Actif' },
-  { id: 'EMP008', name: 'Camille Dubois', email: 'camille.dubois@entreprise.fr', position: 'Designer UI/UX', department: 'Marketing', status: 'Inactif' },
-  { id: 'EMP009', name: 'Alexandre Blanc', email: 'alexandre.blanc@entreprise.fr', position: 'Analyste Financier', department: 'Finance', status: 'Actif' },
-  { id: 'EMP010', name: 'Émilie Rousseau', email: 'emilie.rousseau@entreprise.fr', position: 'Assistante RH', department: 'RH', status: 'Actif' },
-];
 
 export default Employees;
