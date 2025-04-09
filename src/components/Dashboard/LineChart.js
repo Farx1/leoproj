@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-const LineChart = ({ data, title }) => {
+const LineChart = ({ data }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -10,39 +10,49 @@ const LineChart = ({ data, title }) => {
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    const maxValue = Math.max(...data.map(item => item.value));
-    const padding = 30;
-    
-    // Clear canvas
+
+    // Effacer le canvas
     ctx.clearRect(0, 0, width, height);
-    
-    // Draw grid lines
-    ctx.strokeStyle = '#2d3748';
+
+    // Définir les couleurs et styles
+    const primaryColor = '#4F46E5';
+    const gridColor = 'rgba(255, 255, 255, 0.1)';
+    const textColor = 'rgba(255, 255, 255, 0.7)';
+
+    // Trouver les valeurs min et max pour l'échelle
+    const values = data.map(item => item.value);
+    const maxValue = Math.max(...values) * 1.1; // Ajouter 10% pour l'espace
+    const minValue = 0;
+
+    // Dessiner la grille et les axes
+    ctx.strokeStyle = gridColor;
     ctx.lineWidth = 0.5;
     
+    // Lignes horizontales
     for (let i = 0; i <= 5; i++) {
-      const y = padding + (height - 2 * padding) * (1 - i / 5);
-      
+      const y = height - (i / 5) * (height - 40);
       ctx.beginPath();
-      ctx.moveTo(padding, y);
-      ctx.lineTo(width - padding, y);
+      ctx.moveTo(40, y);
+      ctx.lineTo(width - 20, y);
       ctx.stroke();
       
-      // Draw y-axis labels
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px sans-serif';
+      // Étiquettes de l'axe Y
+      const value = (i / 5) * maxValue;
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Arial';
       ctx.textAlign = 'right';
-      ctx.fillText(Math.round(maxValue * i / 5), padding - 5, y + 3);
+      ctx.fillText(Math.round(value).toLocaleString(), 35, y + 4);
     }
-    
-    // Draw line
-    ctx.strokeStyle = '#6366f1';
+
+    // Dessiner la ligne du graphique
+    ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    
+
+    // Calculer les points
     data.forEach((item, index) => {
-      const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
-      const y = height - padding - ((item.value / maxValue) * (height - 2 * padding));
+      const x = 40 + (index / (data.length - 1)) * (width - 60);
+      const y = height - ((item.value - minValue) / (maxValue - minValue)) * (height - 40);
       
       if (index === 0) {
         ctx.moveTo(x, y);
@@ -50,53 +60,41 @@ const LineChart = ({ data, title }) => {
         ctx.lineTo(x, y);
       }
       
-      // Draw x-axis labels
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px sans-serif';
+      // Étiquettes de l'axe X
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(item.label, x, height - padding + 15);
+      ctx.fillText(item.month, x, height - 10);
     });
     
     ctx.stroke();
-    
-    // Draw area under the line
-    ctx.lineTo(width - padding, height - padding);
-    ctx.lineTo(padding, height - padding);
-    ctx.closePath();
-    
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
-    gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    
-    // Draw points
+
+    // Dessiner les points
     data.forEach((item, index) => {
-      const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
-      const y = height - padding - ((item.value / maxValue) * (height - 2 * padding));
+      const x = 40 + (index / (data.length - 1)) * (width - 60);
+      const y = height - ((item.value - minValue) / (maxValue - minValue)) * (height - 40);
       
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = primaryColor;
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
       
-      ctx.strokeStyle = '#6366f1';
-      ctx.lineWidth = 2;
+      ctx.fillStyle = '#fff';
       ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fill();
     });
+
   }, [data]);
 
   return (
-    <div className="bg-dark rounded-lg shadow-lg p-6">
-      <h3 className="text-white text-lg font-medium mb-4">{title}</h3>
+    <div className="w-full h-64 relative">
       <canvas 
         ref={canvasRef} 
-        width="500" 
-        height="200" 
-        className="w-full h-auto"
-      ></canvas>
+        width={500} 
+        height={250} 
+        className="w-full h-full"
+      />
     </div>
   );
 };

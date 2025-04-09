@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -9,13 +9,19 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const { login, loading } = useAuth();
+  const { login, loading, currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Rediriger vers la page précédente ou la page d'accueil après connexion
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
+  
   const from = location.state?.from?.pathname || '/';
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
@@ -23,7 +29,7 @@ const Login = () => {
       [name]: value
     }));
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -35,84 +41,92 @@ const Login = () => {
       setError(err.response?.data?.message || 'Identifiants invalides');
     }
   };
-
+  
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center bg-dark-darker"
-    >
-      <div className="w-full max-w-md p-8 bg-dark rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-6 text-white">Connexion</h1>
+    <div className="min-h-screen flex items-center justify-center bg-dark-darker p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="bg-dark rounded-lg shadow-xl p-8 max-w-md w-full"
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Connectez-vous pour accéder à votre espace</p>
+        </div>
         
         {error && (
-          <div className="bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded mb-4">
+          <div className="bg-red-900/50 text-red-300 p-3 rounded-lg mb-6">
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-gray-400 mb-2">Email</label>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">
+              Email
+            </label>
             <input
               type="email"
+              id="email"
               name="email"
               value={credentials.email}
               onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white"
+              className="w-full px-4 py-3 rounded-lg bg-dark-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="votre@email.com"
               required
             />
           </div>
           
-          <div>
-            <label className="block text-gray-400 mb-2">Mot de passe</label>
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-2">
+              Mot de passe
+            </label>
             <input
               type="password"
+              id="password"
               name="password"
               value={credentials.password}
               onChange={handleChange}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white"
+              className="w-full px-4 py-3 rounded-lg bg-dark-darker border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="••••••••"
               required
             />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                className="h-4 w-4 bg-gray-800 border-gray-700 rounded"
-              />
-              <label htmlFor="remember" className="ml-2 text-sm text-gray-400">
-                Se souvenir de moi
-              </label>
-            </div>
-            
-            <a href="#" className="text-sm text-primary hover:underline">
-              Mot de passe oublié?
-            </a>
           </div>
           
           <button
             type="submit"
-            className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-medium"
             disabled={loading}
+            className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
           >
-            {loading ? 'Connexion en cours...' : 'Se connecter'}
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Connexion en cours...
+              </span>
+            ) : 'Se connecter'}
           </button>
         </form>
         
-        <div className="mt-6 text-center text-gray-400">
-          <p>Utilisateurs de test:</p>
-          <ul className="mt-2 text-sm">
-            <li>admin@example.com / admin123 (Admin)</li>
-            <li>manager@example.com / manager123 (Manager)</li>
-            <li>user@example.com / user123 (Utilisateur)</li>
-          </ul>
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>Utilisateurs de démonstration :</p>
+          <div className="mt-2 grid grid-cols-1 gap-2">
+            <div className="text-xs bg-dark-darker p-2 rounded">
+              admin@example.com / admin123
+            </div>
+            <div className="text-xs bg-dark-darker p-2 rounded">
+              manager@example.com / manager123
+            </div>
+            <div className="text-xs bg-dark-darker p-2 rounded">
+              user@example.com / user123
+            </div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import DashboardStats from '../components/Dashboard/DashboardStats';
-import BarChart from '../components/Dashboard/BarChart';
-import LineChart from '../components/Dashboard/LineChart';
-import PieChart from '../components/Dashboard/PieChart';
 import { useAuth } from '../contexts/AuthContext';
+import { motion } from 'framer-motion';
+
+// Composants
+import DashboardStats from '../components/Dashboard/DashboardStats';
+import LineChart from '../components/Dashboard/LineChart';
+import BarChart from '../components/Dashboard/BarChart';
+import PieChart from '../components/Dashboard/PieChart';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -28,60 +28,65 @@ const Dashboard = () => {
         setStats([
           { 
             title: 'Total Employés', 
-            value: '125', 
-            change: 5, 
+            value: '124', 
+            change: '+12%', 
+            changeType: 'positive',
             icon: 'group'
           },
           { 
-            title: 'Emails non lus', 
+            title: 'Projets Actifs', 
             value: '42', 
-            change: 12, 
-            icon: 'email'
+            change: '+7%', 
+            changeType: 'positive',
+            icon: 'assignment'
           },
           { 
-            title: 'Fichiers stockés', 
-            value: '1,254', 
-            change: 8, 
-            icon: 'folder'
+            title: 'Taux de Complétion', 
+            value: '78%', 
+            change: '+5%', 
+            changeType: 'positive',
+            icon: 'check_circle'
           },
           { 
-            title: 'Espace utilisé', 
-            value: '45.8 GB', 
-            change: 3, 
-            icon: 'storage'
+            title: 'Budget Utilisé', 
+            value: '68%', 
+            change: '-3%', 
+            changeType: 'negative',
+            icon: 'account_balance'
           }
         ]);
         
-        // Générer les 7 derniers jours pour le graphique de revenus
-        const today = new Date();
-        const revenueData = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date(today);
-          date.setDate(date.getDate() - (6 - i));
-          return {
-            label: format(date, 'dd/MM'),
-            value: Math.floor(Math.random() * 5000) + 10000
-          };
-        });
-        setRevenueData(revenueData);
+        setRevenueData([
+          { month: 'Jan', value: 65000 },
+          { month: 'Fév', value: 78000 },
+          { month: 'Mar', value: 92000 },
+          { month: 'Avr', value: 85000 },
+          { month: 'Mai', value: 110000 },
+          { month: 'Juin', value: 125000 },
+          { month: 'Juil', value: 105000 },
+          { month: 'Août', value: 130000 },
+          { month: 'Sep', value: 118000 },
+          { month: 'Oct', value: 145000 },
+          { month: 'Nov', value: 140000 },
+          { month: 'Déc', value: 160000 }
+        ]);
         
-        // Données d'activité utilisateur (12 derniers mois)
-        const months = Array.from({ length: 12 }, (_, i) => {
-          const date = new Date();
-          date.setMonth(date.getMonth() - (11 - i));
-          return {
-            label: format(date, 'MMM', { locale: fr }),
-            value: Math.floor(Math.random() * 500) + 100
-          };
-        });
-        setUserActivityData(months);
+        setUserActivityData([
+          { day: 'Lun', value: 120 },
+          { day: 'Mar', value: 145 },
+          { day: 'Mer', value: 135 },
+          { day: 'Jeu', value: 160 },
+          { day: 'Ven', value: 180 },
+          { day: 'Sam', value: 80 },
+          { day: 'Dim', value: 60 }
+        ]);
         
-        // Répartition par département
         setDepartmentData([
-          { label: 'IT', value: 42 },
-          { label: 'Marketing', value: 28 },
-          { label: 'Finance', value: 18 },
-          { label: 'RH', value: 12 },
-          { label: 'Autres', value: 8 }
+          { name: 'IT', value: 35 },
+          { name: 'Marketing', value: 25 },
+          { name: 'Finance', value: 20 },
+          { name: 'RH', value: 15 },
+          { name: 'Autres', value: 5 }
         ]);
         
       } catch (error) {
@@ -105,71 +110,99 @@ const Dashboard = () => {
   return (
     <div>
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="mb-8"
       >
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold mb-0">Dashboard</h1>
-          <div className="text-gray-400">
-            <span className="material-icons align-middle mr-1">today</span>
-            {format(new Date(), 'EEEE dd MMMM yyyy', { locale: fr })}
-          </div>
-        </div>
-        
-        {/* Cartes statistiques */}
-        <DashboardStats stats={stats} />
-        
-        {/* Graphiques */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <LineChart 
-            data={userActivityData} 
-            title="Activité des utilisateurs (12 derniers mois)" 
-          />
-          <BarChart 
-            data={revenueData} 
-            title="Revenus (7 derniers jours)" 
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <PieChart 
-            data={departmentData} 
-            title="Répartition par département" 
-          />
-          
-          <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold mb-4">Activité récente</h2>
-            <div className="bg-dark rounded-lg shadow-lg p-6">
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <div key={item} className="flex items-start border-b border-gray-700 pb-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-4">
-                      <span className="material-icons text-primary">
-                        {['person', 'email', 'folder', 'edit', 'delete'][item % 5]}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-white">
-                        {[
-                          'Jean Dupont a mis à jour son profil',
-                          'Nouveau message de Marie Martin',
-                          'Pierre Durand a partagé un fichier',
-                          'Sophie Petit a modifié un document',
-                          'Un fichier a été supprimé par l\'administrateur'
-                        ][item % 5]}
-                      </p>
-                      <p className="text-gray-400 text-sm">
-                        {`Il y a ${item * 10} minutes`}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
+        <p className="text-gray-400">
+          Bienvenue, {currentUser?.name || 'Utilisateur'} ! Voici un aperçu de votre activité.
+        </p>
       </motion.div>
+      
+      <DashboardStats stats={stats} />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="card-dashboard"
+        >
+          <h2 className="text-xl font-semibold mb-4">Revenus Mensuels</h2>
+          <LineChart data={revenueData} />
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="card-dashboard"
+        >
+          <h2 className="text-xl font-semibold mb-4">Activité Utilisateurs</h2>
+          <BarChart data={userActivityData} />
+        </motion.div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="card-dashboard lg:col-span-2"
+        >
+          <h2 className="text-xl font-semibold mb-4">Tâches Récentes</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-gray-700">
+                  <th className="pb-3">Tâche</th>
+                  <th className="pb-3">Assigné à</th>
+                  <th className="pb-3">Statut</th>
+                  <th className="pb-3">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-700">
+                  <td className="py-3">Mise à jour du site web</td>
+                  <td className="py-3">Jean Dupont</td>
+                  <td className="py-3"><span className="px-2 py-1 bg-green-900 text-green-300 rounded-full text-xs">Terminé</span></td>
+                  <td className="py-3">12/06/2023</td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="py-3">Intégration API paiement</td>
+                  <td className="py-3">Marie Martin</td>
+                  <td className="py-3"><span className="px-2 py-1 bg-yellow-900 text-yellow-300 rounded-full text-xs">En cours</span></td>
+                  <td className="py-3">15/06/2023</td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="py-3">Rapport financier Q2</td>
+                  <td className="py-3">Pierre Dubois</td>
+                  <td className="py-3"><span className="px-2 py-1 bg-blue-900 text-blue-300 rounded-full text-xs">En attente</span></td>
+                  <td className="py-3">20/06/2023</td>
+                </tr>
+                <tr>
+                  <td className="py-3">Recrutement développeur</td>
+                  <td className="py-3">Sophie Lefebvre</td>
+                  <td className="py-3"><span className="px-2 py-1 bg-red-900 text-red-300 rounded-full text-xs">Retard</span></td>
+                  <td className="py-3">10/06/2023</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="card-dashboard"
+        >
+          <h2 className="text-xl font-semibold mb-4">Répartition par Département</h2>
+          <PieChart data={departmentData} />
+        </motion.div>
+      </div>
     </div>
   );
 };

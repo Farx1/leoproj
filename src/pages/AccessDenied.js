@@ -14,26 +14,19 @@ const AccessDenied = () => {
         <span className="material-icons" style={{ fontSize: '150px' }}>gpp_bad</span>
       </div>
       
-      <h1 className="text-4xl font-bold mb-4">Accès refusé</h1>
+      <h1 className="text-4xl font-bold mb-4">Accès Refusé</h1>
       
       <p className="text-xl text-gray-400 mb-8 text-center max-w-md">
-        Vous n'avez pas les autorisations nécessaires pour accéder à cette page.
+        Vous n'avez pas les permissions nécessaires pour accéder à cette page.
       </p>
       
-      <div className="flex space-x-4">
-        <Link
+      <div className="flex gap-4">
+        <Link 
           to="/"
-          className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium"
+          className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors"
         >
-          Retour à l'accueil
+          Retour au Dashboard
         </Link>
-        
-        <button
-          onClick={() => window.history.back()}
-          className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium"
-        >
-          Retour à la page précédente
-        </button>
       </div>
     </motion.div>
   );
