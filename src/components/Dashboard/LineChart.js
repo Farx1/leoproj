@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
-const LineChart = ({ data }) => {
+const LineChart = ({ data, title = "Évolution des ventes mensuelles" }) => {
   const canvasRef = useRef(null);
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, value: null, label: null });
 
   useEffect(() => {
     if (!canvasRef.current || !data || data.length === 0) return;
@@ -10,6 +11,15 @@ const LineChart = ({ data }) => {
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
+    
+    // Effacer le canvas avant de dessiner
+    ctx.clearRect(0, 0, width, height);
+    
+    // Dessiner le titre
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, width / 2, 20);
 
     // Effacer le canvas
     ctx.clearRect(0, 0, width, height);
@@ -87,14 +97,68 @@ const LineChart = ({ data }) => {
 
   }, [data]);
 
+  // Gestion du survol
+  const handleMouseMove = (e) => {
+    if (!canvasRef.current || !data || data.length === 0) return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+    const xStep = (width - 2 * padding) / (data.length - 1);
+    
+    // Vérifier si la souris est proche d'un point
+    for (let i = 0; i < data.length; i++) {
+      const pointX = padding + i * xStep;
+      const pointY = height - padding - (data[i].value / Math.max(...data.map(d => d.value))) * (height - 2 * padding);
+      
+      const distance = Math.sqrt(Math.pow(x - pointX, 2) + Math.pow(y - pointY, 2));
+      
+      if (distance < 20) {
+        setTooltip({
+          show: true,
+          x: pointX,
+          y: pointY,
+          value: data[i].value,
+          label: data[i].month
+        });
+        return;
+      }
+    }
+    
+    setTooltip({ show: false, x: 0, y: 0, value: null, label: null });
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip({ show: false, x: 0, y: 0, value: null, label: null });
+  };
+
   return (
     <div className="w-full h-64 relative">
       <canvas 
         ref={canvasRef} 
         width={500} 
         height={250} 
-        className="w-full h-full"
+        className="w-full h-full" 
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       />
+      {tooltip.show && (
+        <div 
+          className="absolute bg-dark-light text-white p-2 rounded shadow-lg z-10 text-sm"
+          style={{ 
+            left: `${tooltip.x}px`, 
+            top: `${tooltip.y - 40}px`,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <div className="font-bold">{tooltip.label}</div>
+          <div>{tooltip.value.toLocaleString()} €</div>
+        </div>
+      )}
     </div>
   );
 };

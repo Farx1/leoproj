@@ -7,6 +7,8 @@ import DashboardStats from '../components/Dashboard/DashboardStats';
 import LineChart from '../components/Dashboard/LineChart';
 import BarChart from '../components/Dashboard/BarChart';
 import PieChart from '../components/Dashboard/PieChart';
+import RecentTasks from '../components/Dashboard/RecentTasks';
+import DeadlineCalendar from '../components/Dashboard/DeadlineCalendar';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -15,6 +17,20 @@ const Dashboard = () => {
   const [revenueData, setRevenueData] = useState([]);
   const [userActivityData, setUserActivityData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [dashboardLayout, setDashboardLayout] = useState(null);
+  
+  useEffect(() => {
+    // Charger la configuration du tableau de bord personnalisé
+    const savedLayout = localStorage.getItem('dashboardLayout');
+    if (savedLayout) {
+      try {
+        setDashboardLayout(JSON.parse(savedLayout));
+      } catch (e) {
+        console.error('Erreur lors du chargement de la configuration du tableau de bord:', e);
+      }
+    }
+  }, []);
   
   useEffect(() => {
     // Simuler un appel API
@@ -89,6 +105,45 @@ const Dashboard = () => {
           { name: 'Autres', value: 5 }
         ]);
         
+        // Tâches récentes
+        setTasks([
+          {
+            id: 1,
+            title: 'Mise à jour du site web',
+            status: 'En cours',
+            assignee: 'Jean Dupont',
+            dueDate: '2025-04-20'
+          },
+          {
+            id: 2,
+            title: 'Rapport financier mensuel',
+            status: 'Terminé',
+            assignee: 'Marie Martin',
+            dueDate: '2025-04-10'
+          },
+          {
+            id: 3,
+            title: 'Recrutement développeur frontend',
+            status: 'En attente',
+            assignee: 'Sophie Lefebvre',
+            dueDate: '2025-04-25'
+          },
+          {
+            id: 4,
+            title: 'Préparation réunion clients',
+            status: 'Retard',
+            assignee: 'Pierre Dubois',
+            dueDate: '2025-04-12'
+          },
+          {
+            id: 5,
+            title: 'Mise à jour logiciel comptabilité',
+            status: 'En cours',
+            assignee: 'Jean Dupont',
+            dueDate: '2025-04-30'
+          }
+        ]);
+        
       } catch (error) {
         console.error('Erreur lors du chargement des données du dashboard:', error);
       } finally {
@@ -99,110 +154,117 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
   
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // Sauvegarder la configuration du tableau de bord
+  const saveDashboardLayout = (layout) => {
+    localStorage.setItem('dashboardLayout', JSON.stringify(layout));
+    setDashboardLayout(layout);
+  };
   
   return (
     <div>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8"
-      >
-        <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
-        <p className="text-gray-400">
-          Bienvenue, {currentUser?.name || 'Utilisateur'} ! Voici un aperçu de votre activité.
-        </p>
-      </motion.div>
-      
-      <DashboardStats stats={stats} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="card-dashboard"
-        >
-          <h2 className="text-xl font-semibold mb-4">Revenus Mensuels</h2>
-          <LineChart data={revenueData} />
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="card-dashboard"
-        >
-          <h2 className="text-xl font-semibold mb-4">Activité Utilisateurs</h2>
-          <BarChart data={userActivityData} />
-        </motion.div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Tableau de bord</h1>
+        <div className="flex items-center space-x-4">
+          <p className="text-gray-400">Bienvenue, {currentUser?.name}</p>
+          <button 
+            className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary-focus transition-colors"
+            onClick={() => {
+              // Logique pour personnaliser le tableau de bord
+              // Pour l'instant, on utilise une configuration simple
+              const newLayout = dashboardLayout ? null : {
+                leftColumn: ['stats', 'revenueChart', 'departmentChart'],
+                rightColumn: ['calendar', 'tasks', 'userActivityChart']
+              };
+              saveDashboardLayout(newLayout);
+            }}
+          >
+            <span className="material-icons text-sm mr-1">dashboard_customize</span>
+            {dashboardLayout ? 'Réinitialiser' : 'Personnaliser'}
+          </button>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="card-dashboard lg:col-span-2"
-        >
-          <h2 className="text-xl font-semibold mb-4">Tâches Récentes</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-400 border-b border-gray-700">
-                  <th className="pb-3">Tâche</th>
-                  <th className="pb-3">Assigné à</th>
-                  <th className="pb-3">Statut</th>
-                  <th className="pb-3">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Mise à jour du site web</td>
-                  <td className="py-3">Jean Dupont</td>
-                  <td className="py-3"><span className="px-2 py-1 bg-green-900 text-green-300 rounded-full text-xs">Terminé</span></td>
-                  <td className="py-3">12/06/2023</td>
-                </tr>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Intégration API paiement</td>
-                  <td className="py-3">Marie Martin</td>
-                  <td className="py-3"><span className="px-2 py-1 bg-yellow-900 text-yellow-300 rounded-full text-xs">En cours</span></td>
-                  <td className="py-3">15/06/2023</td>
-                </tr>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Rapport financier Q2</td>
-                  <td className="py-3">Pierre Dubois</td>
-                  <td className="py-3"><span className="px-2 py-1 bg-blue-900 text-blue-300 rounded-full text-xs">En attente</span></td>
-                  <td className="py-3">20/06/2023</td>
-                </tr>
-                <tr>
-                  <td className="py-3">Recrutement développeur</td>
-                  <td className="py-3">Sophie Lefebvre</td>
-                  <td className="py-3"><span className="px-2 py-1 bg-red-900 text-red-300 rounded-full text-xs">Retard</span></td>
-                  <td className="py-3">10/06/2023</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="card-dashboard"
-        >
-          <h2 className="text-xl font-semibold mb-4">Répartition par Département</h2>
-          <PieChart data={departmentData} />
-        </motion.div>
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <>
+          {/* Toujours afficher les statistiques en haut */}
+          <DashboardStats stats={stats} />
+          
+          {dashboardLayout ? (
+            // Affichage personnalisé
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <div className="space-y-6">
+                {dashboardLayout.leftColumn.map((item, index) => (
+                  <React.Fragment key={index}>
+                    {item === 'revenueChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <LineChart data={revenueData} />
+                      </div>
+                    )}
+                    {item === 'userActivityChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <BarChart data={userActivityData} />
+                      </div>
+                    )}
+                    {item === 'departmentChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <PieChart data={departmentData} />
+                      </div>
+                    )}
+                    {item === 'tasks' && <RecentTasks tasks={tasks} />}
+                    {item === 'calendar' && <DeadlineCalendar tasks={tasks} />}
+                  </React.Fragment>
+                ))}
+              </div>
+              <div className="space-y-6">
+                {dashboardLayout.rightColumn.map((item, index) => (
+                  <React.Fragment key={index}>
+                    {item === 'revenueChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <LineChart data={revenueData} />
+                      </div>
+                    )}
+                    {item === 'userActivityChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <BarChart data={userActivityData} />
+                      </div>
+                    )}
+                    {item === 'departmentChart' && (
+                      <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                        <PieChart data={departmentData} />
+                      </div>
+                    )}
+                    {item === 'tasks' && <RecentTasks tasks={tasks} />}
+                    {item === 'calendar' && <DeadlineCalendar tasks={tasks} />}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Affichage par défaut
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                <LineChart data={revenueData} />
+              </div>
+              
+              <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                <BarChart data={userActivityData} />
+              </div>
+              
+              <div className="bg-dark-light p-4 rounded-lg shadow-lg">
+                <PieChart data={departmentData} />
+              </div>
+              
+              <RecentTasks tasks={tasks} />
+              
+              <DeadlineCalendar tasks={tasks} className="lg:col-span-2" />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
