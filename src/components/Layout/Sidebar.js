@@ -71,16 +71,21 @@ const Sidebar = () => {
               return null;
             }
             
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || 
+                            (item.path !== '/' && location.pathname.startsWith(item.path));
             
             return (
               <li key={item.path} className="px-2 py-1">
                 <Link 
                   to={item.path} 
-                  className={`sidebar-link ${isActive ? 'active' : ''}`}
+                  className={`flex items-center p-3 rounded-lg transition-colors ${
+                    isActive 
+                      ? 'bg-primary text-white' 
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  }`}
                 >
                   <span className="material-icons">{item.icon}</span>
-                  {!isCollapsed && <span>{item.name}</span>}
+                  {!isCollapsed && <span className="ml-3">{item.name}</span>}
                 </Link>
               </li>
             );

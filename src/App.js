@@ -8,6 +8,9 @@ import Layout from './components/Layout/Layout';
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Employees from './pages/Employees';
+import Emails from './pages/Emails';
+import Settings from './pages/Settings';
 import AccessDenied from './pages/AccessDenied';
 
 // Composant de route protégée
@@ -35,6 +38,9 @@ function App() {
       
       <Route path="/" element={<Layout />}>
         <Route index element={<ProtectedRoute element={<Dashboard />} />} />
+        <Route path="employees" element={<ProtectedRoute element={<Employees />} roles={['admin', 'manager']} />} />
+        <Route path="emails" element={<ProtectedRoute element={<Emails />} roles={['admin', 'user']} />} />
+        <Route path="settings" element={<ProtectedRoute element={<Settings />} roles={['admin']} />} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
