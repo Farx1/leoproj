@@ -1,32 +1,5 @@
 import { jwtDecode } from 'jwt-decode';
-
-// Simulation d'une base de données utilisateurs pour le développement
-const mockUsers = [
-  {
-    id: 1,
-    email: 'admin@example.com',
-    password: 'admin123',
-    name: 'Admin User',
-    roles: ['admin'],
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-  },
-  {
-    id: 2,
-    email: 'manager@example.com',
-    password: 'manager123',
-    name: 'Manager User',
-    roles: ['manager'],
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-  },
-  {
-    id: 3,
-    email: 'user@example.com',
-    password: 'user123',
-    name: 'Regular User',
-    roles: ['user'],
-    avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-  }
-];
+import { mockUsers } from '../data/mockData';
 
 // Afficher les informations de connexion en mode développement
 if (process.env.NODE_ENV === 'development') {
@@ -67,7 +40,10 @@ const AuthService = {
   // Connexion utilisateur
   login: async (email, password) => {
     try {
-      // Toujours utiliser les utilisateurs mockés pour la démo
+      // Simuler un délai réseau
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Utiliser les utilisateurs mockés
       const user = mockUsers.find(u => u.email === email && u.password === password);
       
       if (!user) {

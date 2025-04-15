@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
+import { mockDashboardData } from '../data/mockData';
 
 // Composants
 import DashboardStats from '../components/Dashboard/DashboardStats';
@@ -37,112 +38,15 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Dans une vraie application, ce serait un appel API
+        // Simuler un délai réseau
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Données mockées
-        setStats([
-          { 
-            title: 'Total Employés', 
-            value: '124', 
-            change: '+12%', 
-            changeType: 'positive',
-            icon: 'group'
-          },
-          { 
-            title: 'Projets Actifs', 
-            value: '42', 
-            change: '+7%', 
-            changeType: 'positive',
-            icon: 'assignment'
-          },
-          { 
-            title: 'Taux de Complétion', 
-            value: '78%', 
-            change: '+5%', 
-            changeType: 'positive',
-            icon: 'check_circle'
-          },
-          { 
-            title: 'Budget Utilisé', 
-            value: '68%', 
-            change: '-3%', 
-            changeType: 'negative',
-            icon: 'account_balance'
-          }
-        ]);
-        
-        setRevenueData([
-          { month: 'Jan', value: 65000 },
-          { month: 'Fév', value: 78000 },
-          { month: 'Mar', value: 92000 },
-          { month: 'Avr', value: 85000 },
-          { month: 'Mai', value: 110000 },
-          { month: 'Juin', value: 125000 },
-          { month: 'Juil', value: 105000 },
-          { month: 'Août', value: 130000 },
-          { month: 'Sep', value: 118000 },
-          { month: 'Oct', value: 145000 },
-          { month: 'Nov', value: 140000 },
-          { month: 'Déc', value: 160000 }
-        ]);
-        
-        setUserActivityData([
-          { day: 'Lun', value: 120 },
-          { day: 'Mar', value: 145 },
-          { day: 'Mer', value: 135 },
-          { day: 'Jeu', value: 160 },
-          { day: 'Ven', value: 180 },
-          { day: 'Sam', value: 80 },
-          { day: 'Dim', value: 60 }
-        ]);
-        
-        setDepartmentData([
-          { name: 'IT', value: 35 },
-          { name: 'Marketing', value: 25 },
-          { name: 'Finance', value: 20 },
-          { name: 'RH', value: 15 },
-          { name: 'Autres', value: 5 }
-        ]);
-        
-        // Tâches récentes
-        setTasks([
-          {
-            id: 1,
-            title: 'Mise à jour du site web',
-            status: 'En cours',
-            assignee: 'Jean Dupont',
-            dueDate: '2025-04-20'
-          },
-          {
-            id: 2,
-            title: 'Rapport financier mensuel',
-            status: 'Terminé',
-            assignee: 'Marie Martin',
-            dueDate: '2025-04-10'
-          },
-          {
-            id: 3,
-            title: 'Recrutement développeur frontend',
-            status: 'En attente',
-            assignee: 'Sophie Lefebvre',
-            dueDate: '2025-04-25'
-          },
-          {
-            id: 4,
-            title: 'Préparation réunion clients',
-            status: 'Retard',
-            assignee: 'Pierre Dubois',
-            dueDate: '2025-04-12'
-          },
-          {
-            id: 5,
-            title: 'Mise à jour logiciel comptabilité',
-            status: 'En cours',
-            assignee: 'Jean Dupont',
-            dueDate: '2025-04-30'
-          }
-        ]);
+        // Utiliser les données mockées
+        setStats(mockDashboardData.stats);
+        setRevenueData(mockDashboardData.revenueData);
+        setUserActivityData(mockDashboardData.userActivityData);
+        setDepartmentData(mockDashboardData.departmentData);
+        setTasks(mockDashboardData.tasks);
         
       } catch (error) {
         console.error('Erreur lors du chargement des données du dashboard:', error);
