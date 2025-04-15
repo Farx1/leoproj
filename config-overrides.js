@@ -20,3 +20,22 @@ module.exports = function override(config, env) {
   
   return config;
 };
+
+// Fix for webpack-dev-server deprecation warnings
+const overrideDevServer = (config) => {
+  return {
+    ...config,
+    // Remove deprecated options
+    onBeforeSetupMiddleware: undefined,
+    onAfterSetupMiddleware: undefined,
+    // Use the new setupMiddlewares option
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      return middlewares;
+    },
+  };
+};
+
+module.exports.overrideDevServer = overrideDevServer;
