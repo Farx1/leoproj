@@ -9,11 +9,14 @@ module.exports = function override(config, env) {
 // Configuration spécifique pour webpack-dev-server
 const overrideDevServer = (config) => {
   // Créer une nouvelle configuration sans les options dépréciées
-  const newConfig = { ...config };
+  const newConfig = {};
   
-  // Supprimer explicitement les options dépréciées
-  delete newConfig.onBeforeSetupMiddleware;
-  delete newConfig.onAfterSetupMiddleware;
+  // Copier toutes les propriétés sauf celles qui sont dépréciées
+  for (const key in config) {
+    if (key !== 'onBeforeSetupMiddleware' && key !== 'onAfterSetupMiddleware') {
+      newConfig[key] = config[key];
+    }
+  }
   
   // Ajouter la nouvelle option setupMiddlewares
   newConfig.setupMiddlewares = (middlewares, devServer) => {
@@ -36,3 +39,21 @@ const overrideDevServer = (config) => {
 
 // Exporter la configuration du serveur de développement
 module.exports.overrideDevServer = overrideDevServer;
+
+// Ajouter une configuration pour le serveur de développement webpack 5
+module.exports.devServer = function(configFunction) {
+  return function(proxy, allowedHost) {
+    const config = configFunction(proxy, allowedHost);
+    
+    // Supprimer les options dépréciées
+    delete config.onBeforeSetupMiddleware;
+    delete config.onAfterSetupMiddleware;
+    
+    // Ajouter la nouvelle option setupMiddlewares
+    config.setupMiddlewares = (middlewares, devServer) => {
+      return middlewares;
+    };
+    
+    return config;
+  };
+};
