@@ -1,41 +1,38 @@
 const path = require('path');
 
+// Configuration principale de webpack
 module.exports = function override(config, env) {
-  // Mise à jour de la configuration webpack-dev-server
-  if (config.devServer) {
-    // Remplacer onBeforeSetupMiddleware et onAfterSetupMiddleware par setupMiddlewares
-    delete config.devServer.onBeforeSetupMiddleware;
-    delete config.devServer.onAfterSetupMiddleware;
-    
-    config.devServer.setupMiddlewares = (middlewares, devServer) => {
-      if (!devServer) {
-        throw new Error('webpack-dev-server is not defined');
-      }
-      
-      // Ajouter vos middlewares personnalisés ici si nécessaire
-      
-      return middlewares;
-    };
-  }
-  
+  // Aucune modification spécifique à webpack ici
   return config;
 };
 
-// Fix for webpack-dev-server deprecation warnings
+// Configuration spécifique pour webpack-dev-server
 const overrideDevServer = (config) => {
-  return {
-    ...config,
-    // Remove deprecated options
-    onBeforeSetupMiddleware: undefined,
-    onAfterSetupMiddleware: undefined,
-    // Use the new setupMiddlewares option
-    setupMiddlewares: (middlewares, devServer) => {
-      if (!devServer) {
-        throw new Error('webpack-dev-server is not defined');
-      }
-      return middlewares;
-    },
+  // Créer une nouvelle configuration sans les options dépréciées
+  const newConfig = { ...config };
+  
+  // Supprimer explicitement les options dépréciées
+  delete newConfig.onBeforeSetupMiddleware;
+  delete newConfig.onAfterSetupMiddleware;
+  
+  // Ajouter la nouvelle option setupMiddlewares
+  newConfig.setupMiddlewares = (middlewares, devServer) => {
+    // Préserver la fonctionnalité des anciennes options si elles existaient
+    if (config.onBeforeSetupMiddleware) {
+      config.onBeforeSetupMiddleware(devServer);
+    }
+    
+    // Ici, vous pouvez ajouter des middlewares personnalisés si nécessaire
+    
+    if (config.onAfterSetupMiddleware) {
+      config.onAfterSetupMiddleware(devServer);
+    }
+    
+    return middlewares;
   };
+  
+  return newConfig;
 };
 
+// Exporter la configuration du serveur de développement
 module.exports.overrideDevServer = overrideDevServer;
