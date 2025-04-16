@@ -42,6 +42,13 @@ Ce projet est un tableau de bord administratif moderne qui permet aux utilisateu
 - Boutons pour créer de nouveaux éléments
 - Boutons pour afficher les détails
 
+### Visualisation des Données
+- Graphiques interactifs avec animations et tooltips
+- Graphiques à barres pour les données catégorielles
+- Graphiques linéaires pour les tendances temporelles
+- Graphiques circulaires pour les répartitions
+- Interaction utilisateur avec survol et sélection
+
 ## Structure du Projet
 
 ### Composants Principaux
@@ -50,6 +57,11 @@ Ce projet est un tableau de bord administratif moderne qui permet aux utilisateu
 - `DashboardPerformance`: Affiche les données de performance
 - `DashboardActivity`: Affiche le journal d'activité
 - `DashboardProjects`: Gère l'affichage et la création de projets
+
+### Composants de Visualisation
+- `BarChart`: Affiche des données sous forme de graphique à barres
+- `LineChart`: Affiche des données sous forme de graphique linéaire
+- `PieChart`: Affiche des données sous forme de graphique circulaire
 
 ### Services
 - `DashboardService`: Gère les opérations liées aux données du tableau de bord
@@ -61,5 +73,5 @@ Ce projet est un tableau de bord administratif moderne qui permet aux utilisateu
 ## Technologies Utilisées
 - React pour l'interface utilisateur
 - Framer Motion pour les animations
-- Recharts pour les graphiques
+- Recharts pour les graphiques interactifs
 - Tailwind CSS pour le style
