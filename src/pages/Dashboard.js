@@ -155,7 +155,7 @@ const Dashboard = () => {
         </div>
         
         {/* Onglets de navigation */}
-        <div className="flex flex-wrap mt-6 border-b border-gray-700 overflow-x-auto pb-1 hide-scrollbar">
+        <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-6 border-b border-gray-700 overflow-x-auto pb-4 hide-scrollbar">
           <TabButton 
             label="Aperçu"
             icon="dashboard"

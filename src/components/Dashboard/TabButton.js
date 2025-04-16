@@ -14,14 +14,14 @@ const TabButton = ({ label, icon, isActive, onClick }) => {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
+      className={`flex flex-col items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
         isActive 
           ? 'bg-primary text-white' 
           : 'bg-dark-light text-gray-300 hover:bg-gray-700'
       }`}
     >
-      {icon && <span className="material-icons mr-2">{icon}</span>}
-      <span>{label}</span>
+      {icon && <span className="material-icons mb-1">{icon}</span>}
+      <span className="text-sm">{label}</span>
     </motion.button>
   );
 };
