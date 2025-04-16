@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockDashboardData } from '../data/mockData';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import TabButton from '../components/Dashboard/TabButton';
+import DashboardOverview from '../components/Dashboard/DashboardOverview';
+import DashboardPerformance from '../components/Dashboard/DashboardPerformance';
+import DashboardActivity from '../components/Dashboard/DashboardActivity';
+import DashboardProjects from '../components/Dashboard/DashboardProjects';
+import { mockDashboardData } from '../data/mockDashboardData';
 
 // Composants
 import DashboardStats from '../components/Dashboard/DashboardStats';
@@ -21,6 +26,9 @@ const Dashboard = () => {
   const [userActivityData, setUserActivityData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [performanceData, setPerformanceData] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [dashboardLayout, setDashboardLayout] = useState(null);
   const [activeTab, setActiveTab] = useState('aperçu');
   const [refreshing, setRefreshing] = useState(false);
@@ -51,6 +59,9 @@ const Dashboard = () => {
         setUserActivityData(mockDashboardData.userActivityData);
         setDepartmentData(mockDashboardData.departmentData);
         setTasks(mockDashboardData.tasks);
+        setPerformanceData(mockDashboardData.performanceData);
+        setActivities(mockDashboardData.activities);
+        setProjects(mockDashboardData.projects);
         
       } catch (error) {
         console.error('Erreur lors du chargement des données du dashboard:', error);
@@ -61,6 +72,25 @@ const Dashboard = () => {
     
     fetchDashboardData();
   }, [refreshing]);
+  
+  // Fonction pour actualiser les données du tableau de bord
+  const handleRefresh = async () => {
+    setLoading(true);
+    // Simuler un délai réseau
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Réutiliser les mêmes données mockées (dans une vraie application, on ferait un nouvel appel API)
+    setStats([...mockDashboardData.stats]);
+    setRevenueData([...mockDashboardData.revenueData]);
+    setUserActivityData([...mockDashboardData.userActivityData]);
+    setDepartmentData([...mockDashboardData.departmentData]);
+    setTasks([...mockDashboardData.tasks]);
+    setPerformanceData([...mockDashboardData.performanceData]);
+    setActivities([...mockDashboardData.activities]);
+    setProjects([...mockDashboardData.projects]);
+    
+    setLoading(false);
+  };
   
   // Fonction pour rafraîchir les données
   const refreshData = async () => {
@@ -125,20 +155,31 @@ const Dashboard = () => {
         </div>
         
         {/* Onglets de navigation */}
-        <div className="flex mt-6 border-b border-gray-700 overflow-x-auto pb-1 hide-scrollbar">
-          {['aperçu', 'performance', 'activité', 'projets'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 font-medium capitalize transition-colors whitespace-nowrap ${
-                activeTab === tab 
-                  ? 'text-primary border-b-2 border-primary' 
-                  : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="flex flex-wrap mt-6 border-b border-gray-700 overflow-x-auto pb-1 hide-scrollbar">
+          <TabButton 
+            label="Aperçu"
+            icon="dashboard"
+            isActive={activeTab === 'aperçu'}
+            onClick={() => setActiveTab('aperçu')}
+          />
+          <TabButton 
+            label="Performance"
+            icon="trending_up"
+            isActive={activeTab === 'performance'}
+            onClick={() => setActiveTab('performance')}
+          />
+          <TabButton 
+            label="Activité"
+            icon="history"
+            isActive={activeTab === 'activité'}
+            onClick={() => setActiveTab('activité')}
+          />
+          <TabButton 
+            label="Projets"
+            icon="folder"
+            isActive={activeTab === 'projets'}
+            onClick={() => setActiveTab('projets')}
+          />
         </div>
       </div>
       
@@ -162,201 +203,36 @@ const Dashboard = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Statistiques en haut avec animation */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <DashboardStats stats={stats} />
-            </motion.div>
-            
-            {dashboardLayout ? (
-              // Affichage personnalisé
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                <div className="space-y-6">
-                  {dashboardLayout.leftColumn.map((item, index) => (
-                    <motion.div 
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 * (index + 1) }}
-                    >
-                      {item === 'revenueChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Chiffre d'affaires</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <LineChart data={revenueData} />
-                        </div>
-                      )}
-                      {item === 'userActivityChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Activité utilisateurs</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <BarChart data={userActivityData} />
-                        </div>
-                      )}
-                      {item === 'departmentChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Répartition par département</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <PieChart data={departmentData} />
-                        </div>
-                      )}
-                      {item === 'tasks' && <RecentTasks tasks={tasks} />}
-                      {item === 'calendar' && <DeadlineCalendar tasks={tasks} />}
-                    </motion.div>
-                  ))}
-                </div>
-                <div className="space-y-6">
-                  {dashboardLayout.rightColumn.map((item, index) => (
-                    <motion.div 
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 * (index + 1) }}
-                    >
-                      {item === 'revenueChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Chiffre d'affaires</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <LineChart data={revenueData} />
-                        </div>
-                      )}
-                      {item === 'userActivityChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Activité utilisateurs</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <BarChart data={userActivityData} />
-                        </div>
-                      )}
-                      {item === 'departmentChart' && (
-                        <div className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Répartition par département</h3>
-                            <div className="flex gap-2">
-                              <button className="text-gray-400 hover:text-white">
-                                <span className="material-icons text-sm">more_horiz</span>
-                              </button>
-                            </div>
-                          </div>
-                          <PieChart data={departmentData} />
-                        </div>
-                      )}
-                      {item === 'tasks' && <RecentTasks tasks={tasks} />}
-                      {item === 'calendar' && <DeadlineCalendar tasks={tasks} />}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // Affichage par défaut avec animations séquentielles
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-                <motion.div 
-                  className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors lg:col-span-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-white">Chiffre d'affaires mensuel</h3>
-                    <div className="flex gap-2">
-                      <select className="bg-dark border border-gray-700 text-gray-300 text-sm rounded-lg px-2 py-1">
-                        <option>Cette année</option>
-                        <option>Année précédente</option>
-                      </select>
-                      <button className="text-gray-400 hover:text-white">
-                        <span className="material-icons text-sm">more_horiz</span>
-                      </button>
-                    </div>
-                  </div>
-                  <LineChart data={revenueData} />
-                </motion.div>
-                
-                <motion.div 
-                  className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-white">Répartition par département</h3>
-                    <button className="text-gray-400 hover:text-white">
-                      <span className="material-icons text-sm">more_horiz</span>
-                    </button>
-                  </div>
-                  <PieChart data={departmentData} />
-                </motion.div>
-                
-                <motion.div 
-                  className="bg-dark-light p-6 rounded-xl shadow-lg border border-gray-800 hover:border-primary/30 transition-colors lg:col-span-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-white">Activité utilisateurs</h3>
-                    <div className="flex gap-2">
-                      <select className="bg-dark border border-gray-700 text-gray-300 text-sm rounded-lg px-2 py-1">
-                        <option>7 derniers jours</option>
-                        <option>30 derniers jours</option>
-                      </select>
-                      <button className="text-gray-400 hover:text-white">
-                        <span className="material-icons text-sm">more_horiz</span>
-                      </button>
-                    </div>
-                  </div>
-                  <BarChart data={userActivityData} />
-                </motion.div>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.5 }}
-                  className="lg:col-span-3"
-                >
-                  <RecentTasks tasks={tasks} />
-                </motion.div>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.6 }}
-                  className="lg:col-span-3"
-                >
-                  <DeadlineCalendar tasks={tasks} />
-                </motion.div>
-              </div>
+            {activeTab === 'aperçu' && (
+              <DashboardOverview 
+                stats={stats}
+                revenueData={revenueData}
+                userActivityData={userActivityData}
+                departmentData={departmentData}
+                tasks={tasks}
+                onRefresh={handleRefresh}
+              />
+            )}
+
+            {activeTab === 'performance' && (
+              <DashboardPerformance 
+                performanceData={performanceData}
+                onRefresh={handleRefresh}
+              />
+            )}
+
+            {activeTab === 'activité' && (
+              <DashboardActivity 
+                activities={activities}
+                onRefresh={handleRefresh}
+              />
+            )}
+
+            {activeTab === 'projets' && (
+              <DashboardProjects 
+                projects={projects}
+                onRefresh={handleRefresh}
+              />
             )}
           </motion.div>
         )}
