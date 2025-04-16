@@ -1,4 +1,5 @@
-import axios from 'axios';
+// Version temporaire sans axios pour résoudre les problèmes d'importation
+// Cette version utilise fetch au lieu d'axios
 
 // Déterminer l'URL de base en fonction de l'environnement
 const getBaseUrl = () => {
@@ -12,57 +13,135 @@ const getBaseUrl = () => {
   return process.env.REACT_APP_API_URL || 'https://api.example.com';
 };
 
-// Création d'une instance axios avec la configuration de base
-const api = axios.create({
+// Version simplifiée de l'API sans axios
+const api = {
   baseURL: getBaseUrl(),
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  // Ajouter un timeout pour éviter les attentes infinies
-  timeout: 10000
-});
-
-// Intercepteur pour ajouter le token JWT à chaque requête
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Intercepteur pour gérer les erreurs d'authentification (401)
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Vérifier si l'erreur est due à un problème réseau
-    if (!error.response) {
-      console.log('Problème de connexion réseau détecté');
-      // En développement, afficher plus de détails sur l'erreur
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Détails de l\'erreur:', error);
+  
+  // Méthode GET
+  get: async (url, config = {}) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
+      
+      const response = await fetch(`${api.baseURL}${url}`, {
+        method: 'GET',
+        headers,
+        ...config
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
+          window.location.href = `${baseUrl}login`;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return Promise.reject(error);
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
     }
-    
-    if (error.response.status === 401) {
-      // Token expiré ou invalide
-      localStorage.removeItem('token');
-      const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
-      window.location.href = `${baseUrl}login`;
+  },
+  
+  // Méthode POST
+  post: async (url, data, config = {}) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
+      
+      const response = await fetch(`${api.baseURL}${url}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+        ...config
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
+          window.location.href = `${baseUrl}login`;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
     }
-    
-    // En développement, afficher les erreurs dans la console
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`Erreur API ${error.response.status}:`, error.response.data);
+  },
+  
+  // Méthode PUT
+  put: async (url, data, config = {}) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
+      
+      const response = await fetch(`${api.baseURL}${url}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(data),
+        ...config
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
+          window.location.href = `${baseUrl}login`;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
     }
-    return Promise.reject(error);
+  },
+  
+  // Méthode DELETE
+  delete: async (url, config = {}) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
+      
+      const response = await fetch(`${api.baseURL}${url}`, {
+        method: 'DELETE',
+        headers,
+        ...config
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          const baseUrl = process.env.NODE_ENV === 'development' ? '/' : '/#/';
+          window.location.href = `${baseUrl}login`;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
-);
+};
 
 export default api;
