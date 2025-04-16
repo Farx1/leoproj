@@ -9,6 +9,22 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   
+  // Fonction pour obtenir l'icône appropriée
+  const getIcon = (iconName) => {
+    switch (iconName) {
+      case 'dashboard':
+        return '📊';
+      case 'group':
+        return '👥';
+      case 'email':
+        return '📧';
+      case 'settings':
+        return '⚙️';
+      default:
+        return '📋';
+    }
+  };
+  
   const menuItems = [
     { name: 'Tableau de bord', path: '/', icon: 'dashboard', roles: [] }, // Accessible à tous
     { name: 'Employés', path: '/employees', icon: 'group', roles: ['admin', 'manager'] },
@@ -41,9 +57,7 @@ const Sidebar = () => {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="text-gray-400 hover:text-white"
         >
-          <span className="material-icons">
-            {isCollapsed ? 'menu_open' : 'menu'}
-          </span>
+          <span>{isCollapsed ? '≡' : '×'}</span>
         </button>
       </div>
       
@@ -84,11 +98,8 @@ const Sidebar = () => {
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
-                  {!isCollapsed ? (
-                    <span>{item.name}</span>
-                  ) : (
-                    <span className="material-icons">{item.icon}</span>
-                  )}
+                  <span className="mr-3">{getIcon(item.icon)}</span>
+                  {!isCollapsed && <span>{item.name}</span>}
                 </Link>
               </li>
             );
@@ -101,8 +112,8 @@ const Sidebar = () => {
           onClick={handleLogout}
           className={`text-gray-400 hover:text-white ${isCollapsed ? 'mx-auto block' : 'flex items-center'}`}
         >
-          <span className="material-icons">logout</span>
-          {!isCollapsed && <span className="ml-2">Déconnexion</span>}
+          <span className="mr-2">🚪</span>
+          {!isCollapsed && <span>Déconnexion</span>}
         </button>
       </div>
     </motion.div>

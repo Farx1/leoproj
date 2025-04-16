@@ -2,6 +2,22 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const DashboardStats = ({ stats }) => {
+  // Fonction pour obtenir l'icône appropriée
+  const getIcon = (iconName) => {
+    switch (iconName) {
+      case 'payments':
+        return '💰';
+      case 'person_add':
+        return '👤';
+      case 'trending_up':
+        return '📈';
+      case 'confirmation_number':
+        return '🎫';
+      default:
+        return '📊';
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
@@ -16,13 +32,13 @@ const DashboardStats = ({ stats }) => {
           <div className="flex flex-col h-full">
             <div className="flex items-start justify-between mb-4">
               <div className={`p-3 rounded-full ${stat.bgColor || 'bg-primary'} bg-opacity-20`}>
-                <span className={`material-icons ${(stat.bgColor || 'bg-primary').replace('bg-', 'text-')}`}>{stat.icon}</span>
+                <span className={`text-xl ${(stat.bgColor || 'bg-primary').replace('bg-', 'text-')}`}>{getIcon(stat.icon)}</span>
               </div>
               <div className={`flex items-center text-sm px-2 py-1 rounded-full ${
                 (stat.changeType === 'positive' || stat.trend > 0) ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10'
               }`}>
-                <span className="material-icons text-sm mr-1">
-                  {(stat.changeType === 'positive' || stat.trend > 0) ? 'trending_up' : 'trending_down'}
+                <span className="mr-1">
+                  {(stat.changeType === 'positive' || stat.trend > 0) ? '📈' : '📉'}
                 </span>
                 <span>{stat.change || `${Math.abs(stat.trend || 0)}%`}</span>
               </div>

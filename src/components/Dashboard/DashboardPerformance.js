@@ -1,182 +1,60 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /**
  * Composant personnalisé pour afficher un graphique de performance
  */
 const CustomPerformanceChart = ({ data, title, type = 'bar' }) => {
-  const canvasRef = React.useRef(null);
-  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, value: null, label: null });
+  // Formater les données pour Recharts
+  const chartData = data.map(item => ({
+    name: item.label,
+    value: item.value
+  }));
   
-  React.useEffect(() => {
-    if (!canvasRef.current || !data || data.length === 0) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = 40;
-    
-    // Effacer le canvas
-    ctx.clearRect(0, 0, width, height);
-    
-    // Dessiner l'arrière-plan
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, width, height);
-    
-    // Trouver les valeurs min et max
-    const maxValue = Math.max(...data.map(item => item.value)) * 1.1;
-    
-    // Dessiner les axes
-    ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padding, padding);
-    ctx.lineTo(padding, height - padding);
-    ctx.lineTo(width - padding, height - padding);
-    ctx.stroke();
-    
-    // Dessiner le titre
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(title, width / 2, 20);
-    
-    if (type === 'bar') {
-      // Dessiner les barres
-      const barWidth = (width - 2 * padding - (data.length - 1) * 10) / data.length;
-      
-      data.forEach((item, index) => {
-        const x = padding + index * (barWidth + 10);
-        const barHeight = ((height - 2 * padding) * item.value) / maxValue;
-        const y = height - padding - barHeight;
-        
-        // Dessiner la barre
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(x, y, barWidth, barHeight);
-        
-        // Dessiner le label
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(item.label, x + barWidth / 2, height - padding + 15);
-        
-        // Dessiner la valeur
-        ctx.fillText(item.value.toString(), x + barWidth / 2, y - 5);
-      });
-    } else if (type === 'line') {
-      // Dessiner la ligne
-      const pointWidth = (width - 2 * padding) / (data.length - 1);
-      
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      
-      data.forEach((item, index) => {
-        const x = padding + index * pointWidth;
-        const y = height - padding - ((height - 2 * padding) * item.value) / maxValue;
-        
-        if (index === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-        
-        // Dessiner le point
-        ctx.fillStyle = '#3b82f6';
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Dessiner le label
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(item.label, x, height - padding + 15);
-      });
-      
-      ctx.stroke();
+  // Personnalisation du tooltip
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-dark-darker text-white px-3 py-2 rounded-md shadow-lg">
+          <p className="font-bold">{label}</p>
+          <p>{`${payload[0].name}: ${payload[0].value}`}</p>
+        </div>
+      );
     }
-  }, [data, title, type]);
-  
-  const handleMouseMove = (e) => {
-    if (!canvasRef.current || !data || data.length === 0) return;
-    
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = 40;
-    
-    if (type === 'bar') {
-      const barWidth = (width - 2 * padding - (data.length - 1) * 10) / data.length;
-      
-      for (let i = 0; i < data.length; i++) {
-        const barX = padding + i * (barWidth + 10);
-        const barHeight = ((height - 2 * padding) * data[i].value) / (Math.max(...data.map(item => item.value)) * 1.1);
-        const barY = height - padding - barHeight;
-        
-        if (x >= barX && x <= barX + barWidth && y >= barY && y <= height - padding) {
-          setTooltip({
-            show: true,
-            x: barX + barWidth / 2,
-            y: barY - 10,
-            value: data[i].value,
-            label: data[i].label
-          });
-          return;
-        }
-      }
-    } else if (type === 'line') {
-      const pointWidth = (width - 2 * padding) / (data.length - 1);
-      
-      for (let i = 0; i < data.length; i++) {
-        const pointX = padding + i * pointWidth;
-        const pointY = height - padding - ((height - 2 * padding) * data[i].value) / (Math.max(...data.map(item => item.value)) * 1.1);
-        
-        const distance = Math.sqrt(Math.pow(x - pointX, 2) + Math.pow(y - pointY, 2));
-        
-        if (distance <= 10) {
-          setTooltip({
-            show: true,
-            x: pointX,
-            y: pointY - 10,
-            value: data[i].value,
-            label: data[i].label
-          });
-          return;
-        }
-      }
-    }
-    
-    setTooltip({ show: false, x: 0, y: 0, value: null, label: null });
-  };
-  
-  const handleMouseLeave = () => {
-    setTooltip({ show: false, x: 0, y: 0, value: null, label: null });
+    return null;
   };
   
   return (
-    <div className="relative">
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={400}
-        className="w-full h-auto"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      />
-      {tooltip.show && (
-        <div
-          className="absolute bg-dark-darker text-white px-3 py-1 rounded-md shadow-lg z-10 transform -translate-x-1/2"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
-          <div className="font-bold">{tooltip.label}</div>
-          <div>{tooltip.value}</div>
-        </div>
-      )}
+    <div className="w-full">
+      <h3 className="text-lg font-semibold text-white mb-4 text-center">{title}</h3>
+      <div style={{ width: '100%', height: 300 }}>
+        <ResponsiveContainer>
+          {type === 'bar' ? (
+            <BarChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          ) : (
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            </LineChart>
+          )}
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
