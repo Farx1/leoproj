@@ -131,7 +131,7 @@ const Dashboard = () => {
               onClick={refreshData}
               disabled={refreshing}
             >
-              <span className={`material-icons text-sm ${refreshing ? 'animate-spin' : ''}`}>refresh</span>
+              <span className={`${refreshing ? 'animate-spin' : ''}`}>🔄</span>
               {refreshing ? 'Actualisation...' : 'Actualiser'}
             </motion.button>
             
@@ -148,7 +148,7 @@ const Dashboard = () => {
                 saveDashboardLayout(newLayout);
               }}
             >
-              <span className="material-icons text-sm">dashboard_customize</span>
+              <span className="text-sm">⚙️</span>
               {dashboardLayout ? 'Réinitialiser' : 'Personnaliser'}
             </motion.button>
           </div>

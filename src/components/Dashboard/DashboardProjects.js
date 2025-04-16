@@ -60,11 +60,11 @@ const ProjectCard = ({ project, onViewDetails }) => {
         
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-400">
-            <span className="material-icons text-sm mr-1 align-text-bottom">calendar_today</span>
+            <span className="mr-1">📅</span>
             {project.deadline}
           </div>
           <div className="text-sm text-gray-400">
-            <span className="material-icons text-sm mr-1 align-text-bottom">task_alt</span>
+            <span className="mr-1">✓</span>
             {project.tasks.filter(task => task.completed).length}/{project.tasks.length} tâches
           </div>
         </div>
@@ -163,11 +163,11 @@ const DashboardProjects = ({ projects, onRefresh }) => {
             onClick={onRefresh}
             className="flex items-center px-4 py-2 bg-primary rounded-lg hover:bg-primary-dark transition-colors"
           >
-            <span className="material-icons mr-2">refresh</span>
+            <span className="mr-2">🔄</span>
             <span>Actualiser</span>
           </button>
           <button className="flex items-center px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
-            <span className="material-icons mr-2">add</span>
+            <span className="mr-2">➕</span>
             <span>Nouveau projet</span>
           </button>
         </div>
@@ -230,8 +230,8 @@ const DashboardProjects = ({ projects, onRefresh }) => {
                 <option value="name">Nom</option>
                 <option value="progress">Progression</option>
               </select>
-              <span className="material-icons absolute right-3 top-2 text-gray-400 pointer-events-none">
-                sort
+              <span className="absolute right-3 top-2 text-gray-400 pointer-events-none">
+                ↕️
               </span>
             </div>
             
@@ -243,7 +243,7 @@ const DashboardProjects = ({ projects, onRefresh }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-dark-darker border border-gray-700 rounded-lg py-2 pl-10 pr-4 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <span className="material-icons absolute left-3 top-2 text-gray-400">search</span>
+              <span className="absolute left-3 top-2 text-gray-400">🔍</span>
             </div>
           </div>
         </div>
@@ -262,7 +262,7 @@ const DashboardProjects = ({ projects, onRefresh }) => {
         </div>
       ) : (
         <div className="bg-dark-light p-8 rounded-xl shadow-lg border border-gray-800 text-center">
-          <span className="material-icons text-4xl text-gray-400 mb-2">folder_off</span>
+          <span className="text-4xl text-gray-400 mb-2">📂❌</span>
           <h3 className="text-xl font-bold text-white mb-2">Aucun projet trouvé</h3>
           <p className="text-gray-400">
             Aucun projet ne correspond à vos critères de recherche ou de filtrage.

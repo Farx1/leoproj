@@ -9,6 +9,22 @@ import { motion } from 'framer-motion';
  * @param {function} onClick - Fonction à exécuter lors du clic
  */
 const TabButton = ({ label, icon, isActive, onClick }) => {
+  // Fonction pour rendre l'icône en fonction du type d'onglet
+  const renderIcon = () => {
+    switch (icon) {
+      case 'dashboard':
+        return '📊'; // Icône pour Aperçu
+      case 'trending_up':
+        return '📈'; // Icône pour Performance
+      case 'history':
+        return '🕒'; // Icône pour Activité
+      case 'folder':
+        return '📁'; // Icône pour Projets
+      default:
+        return '📋'; // Icône par défaut
+    }
+  };
+
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
@@ -20,7 +36,7 @@ const TabButton = ({ label, icon, isActive, onClick }) => {
           : 'bg-dark-light text-gray-300 hover:bg-gray-700'
       }`}
     >
-      {icon && <span className="material-icons mb-1 text-xl">{icon}</span>}
+      <span className="text-xl mb-1">{renderIcon()}</span>
       <span className="text-sm">{label}</span>
     </motion.button>
   );

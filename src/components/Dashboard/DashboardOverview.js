@@ -32,7 +32,7 @@ const DashboardOverview = ({
           onClick={onRefresh}
           className="flex items-center px-4 py-2 bg-primary rounded-lg hover:bg-primary-dark transition-colors"
         >
-          <span className="material-icons mr-2">refresh</span>
+          <span className="mr-2">🔄</span>
           <span>Actualiser</span>
         </button>
       </div>

@@ -8,17 +8,17 @@ const ActivityItem = ({ activity }) => {
   const getIconByType = (type) => {
     switch (type) {
       case 'email':
-        return 'email';
+        return '📧';
       case 'task':
-        return 'task_alt';
+        return '✅';
       case 'meeting':
-        return 'event';
+        return '📅';
       case 'call':
-        return 'call';
+        return '📞';
       case 'document':
-        return 'description';
+        return '📄';
       default:
-        return 'info';
+        return 'ℹ️';
     }
   };
 
@@ -46,7 +46,7 @@ const ActivityItem = ({ activity }) => {
       className="flex items-start space-x-4 p-4 border-b border-gray-700"
     >
       <div className={`p-2 rounded-full ${getColorByType(activity.type)}`}>
-        <span className="material-icons text-white">{getIconByType(activity.type)}</span>
+        <span className="text-white text-xl">{getIconByType(activity.type)}</span>
       </div>
       <div className="flex-1">
         <div className="flex justify-between">
@@ -110,7 +110,7 @@ const DashboardActivity = ({ activities, onRefresh }) => {
           onClick={onRefresh}
           className="flex items-center px-4 py-2 bg-primary rounded-lg hover:bg-primary-dark transition-colors"
         >
-          <span className="material-icons mr-2">refresh</span>
+          <span className="mr-2">🔄</span>
           <span>Actualiser</span>
         </button>
       </div>
@@ -177,7 +177,7 @@ const DashboardActivity = ({ activities, onRefresh }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-dark-darker border border-gray-700 rounded-lg py-2 pl-10 pr-4 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <span className="material-icons absolute left-3 top-2 text-gray-400">search</span>
+            <span className="absolute left-3 top-2 text-gray-400">🔍</span>
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ const DashboardActivity = ({ activities, onRefresh }) => {
             ))
           ) : (
             <div className="p-8 text-center text-gray-400">
-              <span className="material-icons text-4xl mb-2">search_off</span>
+              <span className="text-4xl mb-2">🔍❌</span>
               <p>Aucune activité ne correspond à vos critères.</p>
             </div>
           )}
