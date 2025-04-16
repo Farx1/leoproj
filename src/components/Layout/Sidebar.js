@@ -10,7 +10,7 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: 'dashboard', roles: [] }, // Accessible à tous
+    { name: 'Tableau de bord', path: '/', icon: 'dashboard', roles: [] }, // Accessible à tous
     { name: 'Employés', path: '/employees', icon: 'group', roles: ['admin', 'manager'] },
     { name: 'Emails', path: '/emails', icon: 'email', roles: ['admin', 'user'] },
     { name: 'Paramètres', path: '/settings', icon: 'settings', roles: ['admin'] },
@@ -33,8 +33,8 @@ const Sidebar = () => {
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         {!isCollapsed && (
           <div className="flex items-center">
-            <span className="text-primary font-bold text-xl">Admin</span>
-            <span className="text-white font-bold">Panel</span>
+            <span className="text-primary font-bold text-xl">Tableau</span>
+            <span className="text-white font-bold">Admin</span>
           </div>
         )}
         <button 
