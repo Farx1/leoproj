@@ -20,7 +20,7 @@ const TabButton = ({ label, icon, isActive, onClick }) => {
           : 'bg-dark-light text-gray-300 hover:bg-gray-700'
       }`}
     >
-      {icon && <span className="material-icons mb-1">{icon}</span>}
+      {icon && <span className="material-icons mb-1 text-xl">{icon}</span>}
       <span className="text-sm">{label}</span>
     </motion.button>
   );
