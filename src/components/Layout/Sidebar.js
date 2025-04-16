@@ -84,8 +84,11 @@ const Sidebar = () => {
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
-                  <span className="material-icons">{item.icon}</span>
-                  {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                  {!isCollapsed ? (
+                    <span>{item.name}</span>
+                  ) : (
+                    <span className="material-icons">{item.icon}</span>
+                  )}
                 </Link>
               </li>
             );
