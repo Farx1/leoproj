@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import DashboardService from '../../services/dashboardService';
 
 /**
  * Composant personnalisé pour afficher un graphique de performance
@@ -65,23 +66,26 @@ const CustomPerformanceChart = ({ data, title, type = 'bar' }) => {
 const DashboardPerformance = ({ performanceData, onRefresh }) => {
   const [timeRange, setTimeRange] = useState('month');
   
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Filtrer les données en fonction de la plage de temps sélectionnée
   const filteredData = React.useMemo(() => {
     if (!performanceData) return [];
     
-    switch (timeRange) {
-      case 'week':
-        return performanceData.filter(item => item.period === 'week');
-      case 'month':
-        return performanceData.filter(item => item.period === 'month');
-      case 'quarter':
-        return performanceData.filter(item => item.period === 'quarter');
-      case 'year':
-        return performanceData.filter(item => item.period === 'year');
-      default:
-        return performanceData;
-    }
+    // Utiliser le service pour filtrer les données
+    return DashboardService.filterPerformanceData(performanceData, timeRange);
   }, [performanceData, timeRange]);
+  
+  // Fonction pour changer la plage de temps
+  const handleTimeRangeChange = (range) => {
+    setIsLoading(true);
+    setTimeRange(range);
+    
+    // Simuler un délai de chargement
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
   
   return (
     <motion.div
@@ -103,36 +107,46 @@ const DashboardPerformance = ({ performanceData, onRefresh }) => {
       </div>
       
       {/* Sélecteur de plage de temps */}
-      <div className="flex space-x-4 bg-dark-light p-4 rounded-lg">
+      <div className="flex space-x-4 bg-dark-light p-4 rounded-lg relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-dark-light bg-opacity-75 flex items-center justify-center">
+            <div className="animate-spin text-primary text-2xl">🔄</div>
+          </div>
+        )}
+        
         <button
-          onClick={() => setTimeRange('week')}
-          className={`px-4 py-2 rounded-md ${
-            timeRange === 'week' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'
+          onClick={() => handleTimeRangeChange('week')}
+          className={`px-4 py-2 rounded-md transition-colors ${
+            timeRange === 'week' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
           }`}
+          disabled={isLoading}
         >
           Semaine
         </button>
         <button
-          onClick={() => setTimeRange('month')}
-          className={`px-4 py-2 rounded-md ${
-            timeRange === 'month' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'
+          onClick={() => handleTimeRangeChange('month')}
+          className={`px-4 py-2 rounded-md transition-colors ${
+            timeRange === 'month' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
           }`}
+          disabled={isLoading}
         >
           Mois
         </button>
         <button
-          onClick={() => setTimeRange('quarter')}
-          className={`px-4 py-2 rounded-md ${
-            timeRange === 'quarter' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'
+          onClick={() => handleTimeRangeChange('quarter')}
+          className={`px-4 py-2 rounded-md transition-colors ${
+            timeRange === 'quarter' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
           }`}
+          disabled={isLoading}
         >
           Trimestre
         </button>
         <button
-          onClick={() => setTimeRange('year')}
-          className={`px-4 py-2 rounded-md ${
-            timeRange === 'year' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'
+          onClick={() => handleTimeRangeChange('year')}
+          className={`px-4 py-2 rounded-md transition-colors ${
+            timeRange === 'year' ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
           }`}
+          disabled={isLoading}
         >
           Année
         </button>

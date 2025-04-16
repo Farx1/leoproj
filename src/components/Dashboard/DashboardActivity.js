@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import DashboardService from '../../services/dashboardService';
 
 /**
  * Composant pour afficher une activité individuelle
@@ -78,23 +79,42 @@ const DashboardActivity = ({ activities, onRefresh }) => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  
   // Filtrer les activités en fonction du filtre et du terme de recherche
   const filteredActivities = React.useMemo(() => {
     if (!activities) return [];
     
-    return activities
-      .filter(activity => {
-        if (filter === 'all') return true;
-        return activity.type === filter;
-      })
-      .filter(activity => {
-        if (!searchTerm) return true;
-        return (
-          activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          activity.description.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      });
+    // Utiliser le service pour filtrer les activités
+    let filtered = DashboardService.filterActivities(activities, filter);
+    filtered = DashboardService.searchActivities(filtered, searchTerm);
+    
+    return filtered;
   }, [activities, filter, searchTerm]);
+  
+  // Effet pour gérer la recherche
+  useEffect(() => {
+    if (searchTerm) {
+      setIsSearching(true);
+      
+      // Simuler un délai de recherche
+      const timer = setTimeout(() => {
+        setSearchResults(filteredActivities);
+        setIsSearching(false);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+  }, [searchTerm, filteredActivities]);
+  
+  // Fonction pour effacer la recherche
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
   
   return (
     <motion.div
@@ -175,9 +195,22 @@ const DashboardActivity = ({ activities, onRefresh }) => {
               placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-dark-darker border border-gray-700 rounded-lg py-2 pl-10 pr-4 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-dark-darker border border-gray-700 rounded-lg py-2 pl-10 pr-10 w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <span className="absolute left-3 top-2 text-gray-400">🔍</span>
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-2 text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            )}
+            {isSearching && (
+              <div className="absolute right-3 top-2 text-gray-400 animate-spin">
+                🔄
+              </div>
+            )}
           </div>
         </div>
       </div>

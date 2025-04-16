@@ -75,21 +75,38 @@ const Dashboard = () => {
   
   // Fonction pour actualiser les données du tableau de bord
   const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      
+      // Utiliser le service pour récupérer les données
+      const data = await DashboardService.getAllData();
+      
+      // Mettre à jour les états avec les nouvelles données
+      setStats(data.stats);
+      setRevenueData(data.revenueData);
+      setUserActivityData(data.userActivityData);
+      setDepartmentData(data.departmentData);
+      setTasks(data.tasks);
+      setPerformanceData(data.performanceData);
+      setActivities(data.activities);
+      setProjects(data.projects);
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'actualisation des données:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fonction pour changer d'onglet
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    
+    // Simuler un chargement lors du changement d'onglet
     setLoading(true);
-    // Simuler un délai réseau
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Réutiliser les mêmes données mockées (dans une vraie application, on ferait un nouvel appel API)
-    setStats([...mockDashboardData.stats]);
-    setRevenueData([...mockDashboardData.revenueData]);
-    setUserActivityData([...mockDashboardData.userActivityData]);
-    setDepartmentData([...mockDashboardData.departmentData]);
-    setTasks([...mockDashboardData.tasks]);
-    setPerformanceData([...mockDashboardData.performanceData]);
-    setActivities([...mockDashboardData.activities]);
-    setProjects([...mockDashboardData.projects]);
-    
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
   };
   
   // Fonction pour rafraîchir les données
@@ -160,25 +177,25 @@ const Dashboard = () => {
             label="Aperçu"
             icon="dashboard"
             isActive={activeTab === 'aperçu'}
-            onClick={() => setActiveTab('aperçu')}
+            onClick={() => handleTabChange('aperçu')}
           />
           <TabButton 
             label="Performance"
             icon="trending_up"
             isActive={activeTab === 'performance'}
-            onClick={() => setActiveTab('performance')}
+            onClick={() => handleTabChange('performance')}
           />
           <TabButton 
             label="Activité"
             icon="history"
             isActive={activeTab === 'activité'}
-            onClick={() => setActiveTab('activité')}
+            onClick={() => handleTabChange('activité')}
           />
           <TabButton 
             label="Projets"
             icon="folder"
             isActive={activeTab === 'projets'}
-            onClick={() => setActiveTab('projets')}
+            onClick={() => handleTabChange('projets')}
           />
         </div>
       </div>
