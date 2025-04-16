@@ -26,7 +26,7 @@ const Sidebar = () => {
   };
   
   const menuItems = [
-    { name: 'Tableau de bord', path: '/', icon: 'dashboard', roles: [] }, // Accessible à tous
+    { name: 'Accueil', path: '/', icon: 'dashboard', roles: [] }, // Accessible à tous
     { name: 'Employés', path: '/employees', icon: 'group', roles: ['admin', 'manager'] },
     { name: 'Emails', path: '/emails', icon: 'email', roles: ['admin', 'user'] },
     { name: 'Paramètres', path: '/settings', icon: 'settings', roles: ['admin'] },

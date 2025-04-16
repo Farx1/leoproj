@@ -6,15 +6,15 @@ const DashboardStats = ({ stats }) => {
   const getIcon = (iconName) => {
     switch (iconName) {
       case 'payments':
-        return '💰';
+        return '💰'; // Icône pour le chiffre d'affaires
       case 'person_add':
-        return '👤';
+        return '👥'; // Icône pour les nouveaux clients
       case 'trending_up':
-        return '📈';
+        return '📈'; // Icône pour le taux de conversion
       case 'confirmation_number':
-        return '🎫';
+        return '🎟️'; // Icône pour les tickets ouverts
       default:
-        return '📊';
+        return '📊'; // Icône par défaut
     }
   };
 

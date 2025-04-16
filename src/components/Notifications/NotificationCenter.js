@@ -83,13 +83,13 @@ const NotificationCenter = () => {
   const getIcon = (type) => {
     switch (type) {
       case 'urgent':
-        return 'priority_high';
+        return '⚠️';
       case 'task':
-        return 'assignment';
+        return '✅';
       case 'meeting':
-        return 'event';
+        return '📅';
       default:
-        return 'notifications';
+        return '🔔';
     }
   };
 
@@ -113,7 +113,7 @@ const NotificationCenter = () => {
         className="relative p-2 rounded-full hover:bg-dark-light transition-colors"
         onClick={() => setShowNotifications(!showNotifications)}
       >
-        <span className="material-icons">notifications</span>
+        <span className="text-xl">🔔</span>
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {unreadCount}
@@ -155,7 +155,7 @@ const NotificationCenter = () => {
                   >
                     <div className="flex">
                       <div className={`mr-3 ${getColor(notification.type)}`}>
-                        <span className="material-icons">{getIcon(notification.type)}</span>
+                        <span className="text-xl">{getIcon(notification.type)}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
@@ -167,7 +167,7 @@ const NotificationCenter = () => {
                                 onClick={() => markAsRead(notification.id)}
                                 title="Marquer comme lu"
                               >
-                                <span className="material-icons text-sm">check</span>
+                                <span className="text-sm">✓</span>
                               </button>
                             )}
                             <button 
@@ -175,7 +175,7 @@ const NotificationCenter = () => {
                               onClick={() => removeNotification(notification.id)}
                               title="Supprimer"
                             >
-                              <span className="material-icons text-sm">close</span>
+                              <span className="text-sm">✕</span>
                             </button>
                           </div>
                         </div>
@@ -192,7 +192,7 @@ const NotificationCenter = () => {
             
             <div className="p-2 text-center border-t border-dark-darker">
               <button className="text-sm text-primary hover:text-primary-focus">
-                Voir toutes les notifications
+                Voir toutes les Notifications
               </button>
             </div>
           </motion.div>
